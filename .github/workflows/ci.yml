@@ -2,6 +2,8 @@ name: Compile, Test, and Publish
 
 on:
   push:
+    branches:
+      - '**'
     paths:
       - '.github/workflows/ci.yml'
       - 'src/**'
