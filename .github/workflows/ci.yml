@@ -40,7 +40,7 @@ jobs:
         with:
           path: |
             ${{ steps.ncc-cache.outputs.NCC_CACHE_DIR }}
-          key: ncc-cache-${{ hashFiles('src/**') }}-${{ hashFiles('package*.json') }}
+          key: ncc-cache-${{ hashFiles('src/**', 'package*.json') }}
           restore-keys: |
             ncc-cache-
           enableCrossOsArchive: true
@@ -49,7 +49,7 @@ jobs:
         with:
           path: |
             ${{ steps.ncc-cache.outputs.NCC_CACHE_DIR }}
-          key: ncc-cache-${{ hashFiles('src/**') }}-${{ hashFiles('package*.json') }}
+          key: ncc-cache-${{ hashFiles('src/**', 'package*.json') }}
           enableCrossOsArchive: true
       - uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
         with:
