@@ -1,0 +1,15 @@
+name: 'ColdFusion/core'
+author: 'ChainFuse'
+description: 'TODO'
+# inputs:
+# outputs:
+runs:
+  using: 'node20'
+  pre: 'dist/pre/index.js'
+  # pre-if:
+  main: 'dist/main/index.js'
+  post: 'dist/post/index.js'
+  # post-if:
+branding:
+  color: 'blue'
+  icon: 'cloud-off'
