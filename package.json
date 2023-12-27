@@ -10,7 +10,9 @@
 		"build:main": "ncc build src/main.ts --v8-cache --minify --target es2023 --out dist/main",
 		"build:main:watch": "npm run build:main -- --watch",
 		"build:post": "ncc build src/post.ts --v8-cache --minify --target es2023 --out dist/post",
-		"build:post:watch": "npm run build:post -- --watch"
+		"build:post:watch": "npm run build:post -- --watch",
+		"ts": "tsc",
+		"ts:watch": "npm run ts -- --watch"
 	},
 	"repository": {
 		"type": "git",

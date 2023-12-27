@@ -1,0 +1,58 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build",
+			"dependsOn": ["TypeScript", "pre", "main", "post"],
+			"isBackground": true,
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"runOptions": {
+				"runOn": "folderOpen"
+			}
+		},
+		{
+			"label": "TypeScript",
+			"detail": "tsc --watch",
+			"type": "npm",
+			"script": "ts:watch",
+			"presentation": {
+				"group": "build"
+			},
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true
+		},
+		{
+			"label": "pre",
+			"detail": "ncc build src/pre.ts --v8-cache --minify --target es2023 --out dist/pre --watch",
+			"type": "npm",
+			"script": "build:pre:watch",
+			"presentation": {
+				"group": "build"
+			},
+			"isBackground": true
+		},
+		{
+			"label": "main",
+			"detail": "ncc build src/main.ts --v8-cache --minify --target es2023 --out dist/main --watch",
+			"type": "npm",
+			"script": "build:main:watch",
+			"presentation": {
+				"group": "build"
+			},
+			"isBackground": true
+		},
+		{
+			"label": "post",
+			"detail": "ncc build src/post.ts --v8-cache --minify --target es2023 --out dist/post --watch",
+			"type": "npm",
+			"script": "build:post:watch",
+			"presentation": {
+				"group": "build"
+			},
+			"isBackground": true
+		}
+	]
+}
