@@ -44,7 +44,9 @@ jobs:
           restore-keys: |
             ncc-cache-
           enableCrossOsArchive: true
-      - run: npm run build
+      - run: npm run build:pre
+      - run: npm run build:main
+      - run: npm run build:post
       - uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: |
