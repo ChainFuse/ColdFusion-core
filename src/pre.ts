@@ -218,8 +218,10 @@ export class PreCore {
 			const cacheKey = await restoreCache([this.modelDir], baseCacheString + (await FileHasher.hashFiles(`${this.modelDir}/*`)), [baseCacheString], { concurrentBlobDownloads: true }, true);
 
 			if (cacheKey) {
+				info(chalk.green('Cache found. Checking files'));
 				// TODO: Check if files actually exist
 			} else {
+				warning(chalk.yellow('Cache not found. Falling back to download'));
 				try {
 					await this.download();
 				} catch (err) {
@@ -227,6 +229,7 @@ export class PreCore {
 				}
 			}
 		} else {
+			warning(chalk.yellow('Cache not available. Falling back to download'));
 			try {
 				await this.download();
 			} catch (err) {
