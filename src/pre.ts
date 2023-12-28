@@ -29,13 +29,13 @@ export class PreSetup {
 		this.modelDir = join(format(parse(getInput('modelDir', { required: true }))), 'ChainFuse', 'ColdFusion', 'models', this.cleanModelName);
 		this.jsonPath = format({
 			dir: this.modelDir,
-			name: getInput('quantMethod', { required: true }),
-			ext: '.gguf',
+			name: 'repo',
+			ext: '.json',
 		});
 		this.modelPath = format({
 			dir: this.modelDir,
-			name: 'repo',
-			ext: '.json',
+			name: getInput('quantMethod', { required: true }),
+			ext: '.gguf',
 		});
 	}
 
