@@ -130,7 +130,13 @@ export class PreSetup {
 				endGroup();
 
 				// Make sure it really is done
-				resolve(writerClosing);
+				resolve(
+					writerClosing.then(() => {
+						performance.mark('model-end-write');
+						const measurement2 = performance.measure('model-download', 'model-start-download', 'model-end-write');
+						info(`Saved in ${measurement2.duration / 1000}s`);
+					}),
+				);
 			} catch (error) {
 				await writer.abort();
 				reject(error);
