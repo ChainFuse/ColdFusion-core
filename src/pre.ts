@@ -1,7 +1,7 @@
 import { isFeatureAvailable, restoreCache } from '@actions/cache';
 import { exportVariable, getInput } from '@actions/core';
 import { hashFiles } from '@actions/glob';
-import { createWriteStream } from 'node:fs';
+import { constants, createWriteStream } from 'node:fs';
 import { format, join, parse } from 'node:path';
 import type { HuggingFaceRepo } from './types.js';
 
@@ -66,7 +66,10 @@ export class PreSetup {
 								const json = jsonContent as HuggingFaceRepo;
 
 								// Save JSON because it has hash and other important stuff
-								const jsonWriteStream = createWriteStream(jsonPath);
+								const jsonWriteStream = createWriteStream(jsonPath, {
+									// u=rw,g=r,o=r
+									mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
+								});
 								jsonWriteStream.write(JSON.stringify(json));
 								jsonWriteStream.end();
 
