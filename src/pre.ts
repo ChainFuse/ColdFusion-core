@@ -1,10 +1,14 @@
 import { isFeatureAvailable, restoreCache } from '@actions/cache';
-import { exportVariable, getInput } from '@actions/core';
+import { endGroup, error, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
 import { hashFiles } from '@actions/glob';
+import { Chalk } from 'chalk';
 import { constants, createWriteStream } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { format, join, parse } from 'node:path';
+import { Writable } from 'node:stream';
 import type { HuggingFaceRepo } from './types.js';
+
+const chalk = new Chalk({ level: 3 });
 
 export class PreSetup {
 	protected cleanModelName: string;
@@ -84,7 +88,59 @@ export class PreSetup {
 								if (filename) {
 									const modelDownloadUrl = new URL(join(json.modelId, 'resolve', 'main', filename), 'https://huggingface.co');
 									modelDownloadUrl.searchParams.set('download', true.toString());
-									console.log(modelDownloadUrl.toString());
+
+									fetch(modelDownloadUrl)
+										.then((modelResponse) => {
+											if (modelResponse.ok) {
+												mainResolve(
+													new Promise(async (resolve, reject) => {
+														const totalSize = parseInt(modelResponse.headers.get('Content-Length') ?? '0', 10);
+														if (totalSize === 0) warning('Total size unknown, progress will not be shown.');
+														let receivedSize = 0;
+
+														const updateProgress = () => {
+															const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
+															const color = chalk.rgb(
+																Math.floor(255 - percentage * 2.55), // Reducing red component
+																Math.floor(255 - percentage * 2.55), // Reducing green component
+																255, // Keeping blue component at max
+															);
+															info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
+														};
+
+														const modelWriter = Writable.toWeb(
+															createWriteStream(this.modelPath, {
+																// u=rw,g=r,o=r
+																mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
+															}),
+														);
+
+														const writer = modelWriter.getWriter();
+
+														if (modelResponse.body) {
+															try {
+																startGroup('Model Download');
+																for await (const chunk of modelResponse.body) {
+																	writer.write(chunk);
+																	receivedSize += chunk.length;
+																	updateProgress();
+																}
+																endGroup();
+																resolve(modelWriter.close());
+															} catch (error) {
+																reject(error);
+															}
+														} else {
+															reject('Bad download body');
+														}
+													}),
+												);
+											} else {
+												mainReject(modelResponse.status);
+											}
+										})
+										.catch(mainReject);
+
 									mainResolve();
 								} else {
 									mainReject(quantMethod);
@@ -114,10 +170,18 @@ export class PreSetup {
 			if (cacheKey) {
 				// TODO: Check if files actually exist
 			} else {
-				this.downloadModelFromHf();
+				try {
+					await this.downloadModelFromHf();
+				} catch (err) {
+					error((err as Error | string | number).toString());
+				}
 			}
 		} else {
-			this.downloadModelFromHf();
+			try {
+				await this.downloadModelFromHf();
+			} catch (err) {
+				error((err as Error | string | number).toString());
+			}
 		}
 
 		exportVariable('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
