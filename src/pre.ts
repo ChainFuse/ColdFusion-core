@@ -84,94 +84,116 @@ export class PreSetup {
 		});
 	}
 
+	private downloadModelBody(totalSize: number, body: NonNullable<Response['body']>) {
+		return new Promise<void>(async (resolve, reject) => {
+			if (totalSize === 0) warning('Total size unknown, progress will not be shown.');
+			let receivedSize = 0;
+			let lastUpdate = Date.now();
+
+			const updateProgress = () => {
+				if (Date.now() - lastUpdate > 1000) {
+					lastUpdate = Date.now();
+
+					const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
+					const color = chalk.rgb(
+						Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting red component
+						Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting green component
+						255, // Keeping blue component at max
+					);
+					info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
+				}
+			};
+
+			const modelWriter = Writable.toWeb(
+				createWriteStream(this.modelPath, {
+					// u=rw,g=r,o=r
+					mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
+				}),
+			);
+
+			const writer = modelWriter.getWriter();
+
+			try {
+				startGroup('Model Download');
+				performance.mark('model-start-download');
+				for await (const chunk of body) {
+					writer.write(chunk);
+					receivedSize += chunk.length;
+					updateProgress();
+				}
+				performance.mark('model-end-download');
+				// Declare here so it already starts closing
+				const writerClosing = writer.close();
+
+				const measurement = performance.measure('model-download', 'model-start-download', 'model-end-download');
+				info(`Downloaded in ${measurement.duration / 1000}s`);
+				endGroup();
+
+				// Make sure it really is done
+				resolve(writerClosing);
+			} catch (error) {
+				await writer.abort();
+				reject(error);
+			}
+		});
+	}
+
+	private downloadModel(modelId: string, filename: string) {
+		const modelDownloadUrl = new URL(join(modelId, 'resolve', 'main', filename), 'https://huggingface.co');
+		modelDownloadUrl.searchParams.set('download', true.toString());
+
+		return new Promise<void>((resolve, reject) => {
+			fetch(modelDownloadUrl)
+				.then((response) => {
+					if (response.ok) {
+						if (response.body) {
+							this.downloadModelBody(parseInt(response.headers.get('Content-Length') ?? '0', 10), response.body)
+								.then(resolve)
+								.catch(reject);
+						} else {
+							reject('Bad download body');
+						}
+					} else {
+						reject(response.status);
+					}
+				})
+				.catch(reject);
+		});
+	}
+
 	private download(quantMethod: string = getInput('quantMethod', { required: true })) {
 		return new Promise<void>((mainResolve, mainReject) => {
 			this.downloadJson()
 				.then((json) => {
-					// Save JSON because it has hash and other important stuff
-					const jsonWriteStream = createWriteStream(this.jsonPath, {
-						// u=rw,g=r,o=r
-						mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
-					});
-					jsonWriteStream.write(JSON.stringify(json));
-					jsonWriteStream.end();
+					// Save JSON at the same time moving on
+					Promise.all([
+						new Promise<void>((resolve, reject) => {
+							try {
+								// Save JSON because it has hash and other important stuff
+								const jsonWriteStream = createWriteStream(this.jsonPath, {
+									// u=rw,g=r,o=r
+									mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
+								});
+								jsonWriteStream.write(JSON.stringify(json));
+								// Have the callback trigger resolve
+								jsonWriteStream.end(resolve);
+							} catch (error) {
+								reject(error);
+							}
+						}),
+						new Promise<void>((resolve, reject) => {
+							// Get the exact file name for the given quant method
+							const filename = this.findFilenameByQuantMethod(json, quantMethod);
 
-					// Get the exact file name for the given quant method
-					const filename = this.findFilenameByQuantMethod(json, quantMethod);
-
-					if (filename) {
-						const modelDownloadUrl = new URL(join(json.modelId, 'resolve', 'main', filename), 'https://huggingface.co');
-						modelDownloadUrl.searchParams.set('download', true.toString());
-
-						fetch(modelDownloadUrl)
-							.then((modelResponse) => {
-								if (modelResponse.ok) {
-									mainResolve(
-										new Promise(async (resolve, reject) => {
-											const totalSize = parseInt(modelResponse.headers.get('Content-Length') ?? '0', 10);
-											if (totalSize === 0) warning('Total size unknown, progress will not be shown.');
-											let receivedSize = 0;
-											let lastUpdate = Date.now();
-
-											const updateProgress = () => {
-												if (Date.now() - lastUpdate > 1000) {
-													lastUpdate = Date.now();
-
-													const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
-													const color = chalk.rgb(
-														Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting red component
-														Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting green component
-														255, // Keeping blue component at max
-													);
-													info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
-												}
-											};
-
-											const modelWriter = Writable.toWeb(
-												createWriteStream(this.modelPath, {
-													// u=rw,g=r,o=r
-													mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
-												}),
-											);
-
-											const writer = modelWriter.getWriter();
-
-											if (modelResponse.body) {
-												try {
-													startGroup('Model Download');
-													performance.mark('model-start-download');
-													for await (const chunk of modelResponse.body) {
-														writer.write(chunk);
-														receivedSize += chunk.length;
-														updateProgress();
-													}
-													performance.mark('model-end-download');
-													// Declare here so it already starts closing
-													const writerClosing = writer.close();
-													const temp = performance.measure('model-download', 'model-start-download', 'model-end-download');
-													info(`Downloaded in ${temp.duration / 1000}s`);
-													endGroup();
-													// Make sure it really is done
-													resolve(writerClosing);
-												} catch (error) {
-													await writer.abort();
-													reject(error);
-												}
-											} else {
-												reject('Bad download body');
-											}
-										}),
-									);
-								} else {
-									mainReject(modelResponse.status);
-								}
-							})
-							.catch(mainReject);
-
-						mainResolve();
-					} else {
-						mainReject(quantMethod);
-					}
+							if (filename) {
+								this.downloadModel(json.modelId, filename).then(resolve).catch(reject);
+							} else {
+								reject(quantMethod);
+							}
+						}),
+					])
+						.then(() => mainResolve())
+						.catch(mainReject);
 				})
 				.catch(mainReject);
 		});
