@@ -1,8 +1,8 @@
 import { isFeatureAvailable, restoreCache } from '@actions/cache';
-import { endGroup, error, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
+import { endGroup, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
 import { Chalk } from 'chalk';
 import { constants, createWriteStream } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
+import { access, mkdir } from 'node:fs/promises';
 import { format, join, parse } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { Writable } from 'node:stream';
@@ -18,6 +18,8 @@ export class PreCore {
 	protected modelPath: string;
 
 	constructor() {
+		exportVariable('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
+
 		let parts1 = getInput('model', { required: true }).split('/');
 
 		// Remove "TheBloke" from the array if it exists
@@ -167,12 +169,11 @@ export class PreCore {
 		});
 	}
 
-	private download(quantMethod: string = getInput('quantMethod', { required: true })) {
+	private download(downloadModel: boolean = false, quantMethod: string = getInput('quantMethod', { required: true })) {
 		return new Promise<void>((mainResolve, mainReject) => {
 			this.downloadJson()
 				.then((json) => {
-					// Save JSON at the same time moving on
-					Promise.all([
+					const promises = [
 						new Promise<void>((resolve, reject) => {
 							try {
 								// Save JSON because it has hash and other important stuff
@@ -187,17 +188,24 @@ export class PreCore {
 								reject(error);
 							}
 						}),
-						new Promise<void>((resolve, reject) => {
-							// Get the exact file name for the given quant method
-							const filename = this.findFilenameByQuantMethod(json, quantMethod);
+					];
 
-							if (filename) {
-								this.downloadModel(json.modelId, filename).then(resolve).catch(reject);
-							} else {
-								reject(quantMethod);
-							}
-						}),
-					])
+					if (downloadModel) {
+						promises.push(
+							new Promise<void>((resolve, reject) => {
+								// Get the exact file name for the given quant method
+								const filename = this.findFilenameByQuantMethod(json, quantMethod);
+
+								if (filename) {
+									this.downloadModel(json.modelId, filename).then(resolve).catch(reject);
+								} else {
+									reject(quantMethod);
+								}
+							}),
+						);
+					}
+
+					Promise.all(promises)
 						.then(() => mainResolve())
 						.catch(mainReject);
 				})
@@ -205,39 +213,48 @@ export class PreCore {
 		});
 	}
 
-	public async main() {
-		await mkdir(this.modelDir, {
-			recursive: true,
-			// u=rwx,g=rx,o=rx
-			mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IXUSR | constants.S_IRGRP | constants.S_IXGRP | constants.S_IROTH | constants.S_IXOTH,
+	public main() {
+		return new Promise<void>((resolve, reject) => {
+			mkdir(this.modelDir, {
+				recursive: true,
+				// u=rwx,g=rx,o=rx
+				mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IXUSR | constants.S_IRGRP | constants.S_IXGRP | constants.S_IROTH | constants.S_IXOTH,
+			})
+				.then(async () => {
+					if (isFeatureAvailable()) {
+						const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
+
+						restoreCache([this.modelPath], baseCacheString + (await FileHasher.hashFiles(this.modelPath)), [baseCacheString], { concurrentBlobDownloads: true }, true)
+							.then((cacheKey) => {
+								if (cacheKey) {
+									info(chalk.green(`Cache found (${cacheKey}). Verifying cache`));
+
+									access(this.modelPath, constants.F_OK)
+										.then(() => {
+											info(chalk.green(`Cache check passed. Using cached`));
+
+											this.download(false).then(resolve).catch(reject);
+										})
+										.catch(() => {
+											warning(chalk.yellow('Cache check failed. Falling back to download'));
+
+											this.download(true).then(resolve).catch(reject);
+										});
+								} else {
+									warning(chalk.yellow('Cache not found. Falling back to download'));
+
+									this.download(true).then(resolve).catch(reject);
+								}
+							})
+							.catch(reject);
+					} else {
+						warning(chalk.yellow('Cache service not available. Falling back to download'));
+
+						this.download(false).then(resolve).catch(reject);
+					}
+				})
+				.catch(reject);
 		});
-
-		if (isFeatureAvailable()) {
-			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
-
-			const cacheKey = await restoreCache([this.jsonPath, this.modelPath], baseCacheString + (await FileHasher.hashFiles([this.jsonPath, this.modelPath].join('\n'))), [baseCacheString], { concurrentBlobDownloads: true }, true);
-
-			if (cacheKey) {
-				info(chalk.green(`Cache found (${cacheKey}). Checking files`));
-				// TODO: Check if files actually exist
-			} else {
-				warning(chalk.yellow('Cache not found. Falling back to download'));
-				try {
-					await this.download();
-				} catch (err) {
-					error((err as Error | string | number).toString());
-				}
-			}
-		} else {
-			warning(chalk.yellow('Cache not available. Falling back to download'));
-			try {
-				await this.download();
-			} catch (err) {
-				error((err as Error | string | number).toString());
-			}
-		}
-
-		exportVariable('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
 	}
 }
 
