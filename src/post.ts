@@ -29,8 +29,7 @@ class PostSetup {
 			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
 
 			try {
-				// 8 to match default download
-				const cacheKey = await saveCache([this.modelDir], baseCacheString + (await hashFiles(`${this.modelDir}/**`)), { uploadConcurrency: 8 }, true);
+				const cacheKey = await saveCache([this.modelDir], baseCacheString + (await hashFiles(`${this.modelDir}/**`)), undefined, true);
 
 				if (cacheKey) {
 					info('Saved to cache successfully');
