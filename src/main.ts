@@ -1,5 +1,6 @@
 import { endGroup, getInput, info, startGroup } from '@actions/core';
 import { LlamaChatSession, LlamaContext, LlamaModel, type Token } from 'node-llama-cpp';
+import { cpus } from 'node:os';
 import { format, join, parse } from 'node:path';
 import { PreCore } from './pre.js';
 
@@ -38,7 +39,7 @@ export class MainCore {
 		const model = new LlamaModel({
 			modelPath: this.modelPath,
 		});
-		const context = new LlamaContext({ model });
+		const context = new LlamaContext({ model, threads: cpus().length });
 		const session = new LlamaChatSession({ context, printLLamaSystemInfo: false });
 
 		startGroup('User Input');
