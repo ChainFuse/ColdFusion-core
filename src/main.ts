@@ -3,6 +3,7 @@ import { exec } from '@actions/exec';
 import { LlamaChatSession, LlamaContext, LlamaModel, type Token } from 'node-llama-cpp';
 import { arch, cpus, platform } from 'node:os';
 import { format, join, parse } from 'node:path';
+import { version } from 'node:process';
 import { graphics } from 'systeminformation';
 import { PreCore } from './pre.js';
 
@@ -37,7 +38,7 @@ export class MainCore {
 		});
 	}
 
-	private isMetalSupported() {
+	private async isMetalSupported() {
 		if (cpus().length === 0) {
 			return false;
 		}
@@ -58,7 +59,7 @@ export class MainCore {
 			if (!this.isMetalSupported()) {
 				startGroup('macOS non metal rebuild');
 
-				await exec('node-llama-cpp', ['download', '--no-metal'], {
+				await exec('node-llama-cpp', ['download', '--no-metal', '--arch', arch(), '--nodeTarget', version], {
 					listeners: {
 						stdout: (data: Buffer) => info(data.toString()),
 						stderr: (data: Buffer) => error(data.toString()),
