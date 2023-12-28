@@ -1,7 +1,7 @@
 import { endGroup, error, getInput, info, startGroup } from '@actions/core';
 import { exec } from '@actions/exec';
 import { LlamaChatSession, LlamaContext, LlamaModel, type Token } from 'node-llama-cpp';
-import { cpus, platform } from 'node:os';
+import { arch, cpus, platform } from 'node:os';
 import { format, join, parse } from 'node:path';
 import { PreCore } from './pre.js';
 
@@ -37,36 +37,16 @@ export class MainCore {
 	}
 
 	private isMetalSupported() {
-		return new Promise<boolean>(async (resolve, reject) => {
-			let stdOutput = '';
-			let stdError = '';
+		if (cpus().length === 0) {
+			return false;
+		}
 
-			startGroup('macOS Metal Check');
-			info(cpus()[0]!.model);
-			exec('system_profiler', ['SPDisplaysDataType'], {
-				listeners: {
-					stdout: (data: Buffer) => {
-						info(data.toString());
-						stdOutput += data.toString();
-					},
-					stderr: (data: Buffer) => {
-						error(data.toString());
-						stdError += data.toString();
-					},
-				},
-			})
-				.then(() => {
-					endGroup();
-					resolve(stdOutput.includes('Metal'));
-					if (stdError.length > 0) reject(stdError);
-				})
-				.catch(reject);
-		});
+		return cpus()[0]!.model.includes('Apple') && arch() === 'arm64';
 	}
 
 	private async pre() {
 		if (platform() === 'darwin') {
-			if (!(await this.isMetalSupported())) {
+			if (!this.isMetalSupported()) {
 				startGroup('macOS non metal rebuild');
 
 				await exec('node-llama-cpp', ['download', '--no-metal'], {
