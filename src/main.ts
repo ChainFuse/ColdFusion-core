@@ -39,7 +39,7 @@ export class MainCore {
 			modelPath: this.modelPath,
 		});
 		const context = new LlamaContext({ model });
-		const session = new LlamaChatSession({ context });
+		const session = new LlamaChatSession({ context, printLLamaSystemInfo: false });
 
 		startGroup('User Input');
 		const q1 = 'Hi there, how are you?';
