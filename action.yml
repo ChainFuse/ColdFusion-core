@@ -11,7 +11,7 @@ inputs:
     required: true
     default: Q2_K
   modelDir:
-    description: Location to download model
+    description: Location to download model. Sub folders for each model will be automatically created
     required: true
     default: ${{ github.repository }}
 # outputs:
