@@ -34,26 +34,26 @@ jobs:
           check-latest: true
           cache: 'npm'
       - run: npm ci
-      # - name: Prepare cache
-      #   id: ncc-cache
-      #   run: echo "NCC_CACHE_DIR=$(npx ncc cache dir)" >> $GITHUB_OUTPUT
-      # - uses: actions/cache/restore@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
-      #   with:
-      #     path: |
-      #       ${{ steps.ncc-cache.outputs.NCC_CACHE_DIR }}
-      #     key: ncc-cache-${{ hashFiles('src/**', 'package*.json') }}
-      #     restore-keys: |
-      #       ncc-cache-
-      #     enableCrossOsArchive: true
+      - name: Prepare cache
+        id: ncc-cache
+        run: echo "NCC_CACHE_DIR=$(npx ncc cache dir)" >> $GITHUB_OUTPUT
+      - uses: actions/cache/restore@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+        with:
+          path: |
+            ${{ steps.ncc-cache.outputs.NCC_CACHE_DIR }}
+          key: ncc-cache-${{ hashFiles('src/**', 'package*.json') }}
+          restore-keys: |
+            ncc-cache-
+          enableCrossOsArchive: true
       - run: npm run build:pre
       - run: npm run build:main
       - run: npm run build:post
-      # - uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
-      #   with:
-      #     path: |
-      #       ${{ steps.ncc-cache.outputs.NCC_CACHE_DIR }}
-      #     key: ncc-cache-${{ hashFiles('src/**', 'package*.json') }}
-      #     enableCrossOsArchive: true
+      - uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+        with:
+          path: |
+            ${{ steps.ncc-cache.outputs.NCC_CACHE_DIR }}
+          key: ncc-cache-${{ hashFiles('src/**', 'package*.json') }}
+          enableCrossOsArchive: true
       - uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
         with:
           name: dist
