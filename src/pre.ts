@@ -8,6 +8,9 @@ import type { HuggingFaceRepo } from './types.js';
 
 export class PreSetup {
 	protected cleanModelName: string;
+	protected modelDir: string;
+	protected jsonPath: string;
+	protected modelPath: string;
 
 	constructor() {
 		let parts1 = getInput('model', { required: true }).split('/');
@@ -21,6 +24,19 @@ export class PreSetup {
 		parts2 = parts2.filter((part) => part.toLowerCase() !== 'GGUF'.toLowerCase());
 
 		this.cleanModelName = parts2.join('-');
+
+		// Do format(parse()) for input validation
+		this.modelDir = join(format(parse(getInput('modelDir', { required: true }))), 'ChainFuse', 'ColdFusion', 'models', this.cleanModelName);
+		this.jsonPath = format({
+			dir: this.modelDir,
+			name: getInput('quantMethod', { required: true }),
+			ext: '.gguf',
+		});
+		this.modelPath = format({
+			dir: this.modelDir,
+			name: 'repo',
+			ext: '.json',
+		});
 	}
 
 	private findFilenameByQuantMethod(data: HuggingFaceRepo, quantMethod: string = getInput('quantMethod', { required: true })) {
@@ -44,20 +60,8 @@ export class PreSetup {
 		return null;
 	}
 
-	private downloadModelFromHf(modelDir: string, quantMethod: string = getInput('quantMethod', { required: true })) {
+	private downloadModelFromHf(quantMethod: string = getInput('quantMethod', { required: true })) {
 		return new Promise<void>((mainResolve, mainReject) => {
-			// @ts-expect-error
-			const modelPath = format({
-				dir: modelDir,
-				name: getInput('quantMethod', { required: true }),
-				ext: '.gguf',
-			});
-			const jsonPath = format({
-				dir: modelDir,
-				name: 'repo',
-				ext: '.json',
-			});
-
 			fetch(new URL(`https://huggingface.co/api/models/TheBloke/${this.cleanModelName}-GGUF`))
 				.then((jsonResponse) => {
 					if (jsonResponse.ok) {
@@ -67,7 +71,7 @@ export class PreSetup {
 								const json = jsonContent as HuggingFaceRepo;
 
 								// Save JSON because it has hash and other important stuff
-								const jsonWriteStream = createWriteStream(jsonPath, {
+								const jsonWriteStream = createWriteStream(this.jsonPath, {
 									// u=rw,g=r,o=r
 									mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
 								});
@@ -96,9 +100,7 @@ export class PreSetup {
 	}
 
 	public async main() {
-		// Do format(parse()) for input validation
-		const modelDir = join(format(parse(getInput('modelDir', { required: true }))), 'ChainFuse', 'ColdFusion', 'models', this.cleanModelName);
-		await mkdir(modelDir, {
+		await mkdir(this.modelDir, {
 			recursive: true,
 			// u=rwx,g=rx,o=rx
 			mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IXUSR | constants.S_IRGRP | constants.S_IXGRP | constants.S_IROTH | constants.S_IXOTH,
@@ -107,15 +109,15 @@ export class PreSetup {
 		if (isFeatureAvailable()) {
 			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
 
-			const cacheKey = await restoreCache([modelDir], baseCacheString + hashFiles(`${modelDir}/**`), [baseCacheString], { concurrentBlobDownloads: true }, true);
+			const cacheKey = await restoreCache([this.modelDir], baseCacheString + hashFiles(`${this.modelDir}/**`), [baseCacheString], { concurrentBlobDownloads: true }, true);
 
 			if (cacheKey) {
 				// TODO: Check if files actually exist
 			} else {
-				this.downloadModelFromHf(modelDir);
+				this.downloadModelFromHf();
 			}
 		} else {
-			this.downloadModelFromHf(modelDir);
+			this.downloadModelFromHf();
 		}
 
 		exportVariable('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
