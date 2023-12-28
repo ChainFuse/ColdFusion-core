@@ -1,6 +1,6 @@
 import { isFeatureAvailable } from '@actions/cache';
 import { exportVariable, getInput } from '@actions/core';
-import { join } from 'node:path';
+import { format, join } from 'node:path';
 
 export class PreSetup {
 	protected cleanModelName: string;
@@ -21,7 +21,13 @@ export class PreSetup {
 
 	public async main() {
 		if (isFeatureAvailable()) {
-			console.log(join(getInput('modelDir', { required: true }), this.cleanModelName, getInput('quantMethod', { required: true }), '.gguf'));
+			const test = format({
+				dir: join(getInput('modelDir', { required: true }), this.cleanModelName),
+				name: getInput('quantMethod', { required: true }),
+				ext: '.gguf',
+			});
+			console.log(join(getInput('modelDir', { required: true }), this.cleanModelName, `${getInput('quantMethod', { required: true })}.gguf`));
+			console.log(test);
 		} else {
 			// TODO: Download
 		}
