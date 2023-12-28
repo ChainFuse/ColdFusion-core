@@ -1,5 +1,5 @@
 import { isFeatureAvailable, restoreCache } from '@actions/cache';
-import { endGroup, error, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
+import { endGroup, error, exportVariable, getInput, startGroup, warning } from '@actions/core';
 import { hashFiles } from '@actions/glob';
 import { Chalk } from 'chalk';
 import { constants, createWriteStream } from 'node:fs';
@@ -105,7 +105,9 @@ export class PreSetup {
 																Math.floor(255 - percentage * 2.55), // Reducing green component
 																255, // Keeping blue component at max
 															);
-															info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
+															process.stdout.clearLine(0);
+															process.stdout.cursorTo(0);
+															process.stdout.write(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
 														};
 
 														const modelWriter = Writable.toWeb(
@@ -114,7 +116,6 @@ export class PreSetup {
 																mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
 															}),
 														);
-
 														const writer = modelWriter.getWriter();
 
 														if (modelResponse.body) {
