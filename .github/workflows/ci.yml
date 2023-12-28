@@ -85,6 +85,8 @@ jobs:
           name: dist
           path: ${{ github.workspace }}/dist
       - uses: ./
+      - run: tree ${{ runner.temp }}/ChainFuse
+        shell: bash
   publish:
     needs: ['test']
     runs-on: ubuntu-latest
