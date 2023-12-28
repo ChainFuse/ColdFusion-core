@@ -3,7 +3,7 @@ import { error, getInput, info, warning } from '@actions/core';
 import { hashFiles } from '@actions/glob';
 import { format, join, parse } from 'node:path';
 
-class PostSetup {
+class PostCore {
 	protected cleanModelName: string;
 	protected modelDir: string;
 
@@ -45,4 +45,4 @@ class PostSetup {
 	}
 }
 
-await new PostSetup().main();
+await new PostCore().main();

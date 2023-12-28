@@ -11,7 +11,7 @@ import type { HuggingFaceRepo } from './types.js';
 
 const chalk = new Chalk({ level: 3 });
 
-export class PreSetup {
+export class PreCore {
 	protected cleanModelName: string;
 	protected modelDir: string;
 	protected jsonPath: string;
@@ -238,4 +238,4 @@ export class PreSetup {
 	}
 }
 
-await new PreSetup().main();
+await new PreCore().main();
