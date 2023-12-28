@@ -85,8 +85,8 @@ jobs:
           name: dist
           path: ${{ github.workspace }}/dist
       - uses: ./
-      - run: tree ${{ runner.temp }}/ChainFuse
-        shell: bash
+      - run: Get-ChildItem -Path ${{ runner.temp }}/ChainFuse -Recurse | Format-Custom -View Tree
+        shell: pwsh
   publish:
     needs: ['test']
     runs-on: ubuntu-latest
