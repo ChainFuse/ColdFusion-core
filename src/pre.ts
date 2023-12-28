@@ -1,5 +1,5 @@
 import { isFeatureAvailable, restoreCache } from '@actions/cache';
-import { error, exportVariable, getInput, group, info, warning } from '@actions/core';
+import { endGroup, error, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
 import { hashFiles } from '@actions/glob';
 import { Chalk } from 'chalk';
 import { constants, createWriteStream } from 'node:fs';
@@ -114,6 +114,7 @@ export class PreSetup {
 			const writer = modelWriter.getWriter();
 
 			try {
+				startGroup('Model Download');
 				performance.mark('model-start-download');
 				for await (const chunk of body) {
 					writer.write(chunk);
@@ -126,15 +127,10 @@ export class PreSetup {
 
 				const measurement = performance.measure('model-download', 'model-start-download', 'model-end-download');
 				info(`Downloaded in ${measurement.duration / 1000}s`);
+				endGroup();
 
 				// Make sure it really is done
-				resolve(
-					writerClosing.then(() => {
-						performance.mark('model-end-write');
-						const measurement2 = performance.measure('model-download', 'model-start-download', 'model-end-write');
-						info(`Saved in ${measurement2.duration / 1000}s`);
-					}),
-				);
+				resolve(writerClosing);
 			} catch (error) {
 				await writer.abort();
 				reject(error);
@@ -171,37 +167,30 @@ export class PreSetup {
 				.then((json) => {
 					// Save JSON at the same time moving on
 					Promise.all([
-						group('Model Info Download', () =>
-							new Promise<void>((resolve, reject) => {
-								info('Beginning to save JSON');
-								try {
-									// Save JSON because it has hash and other important stuff
-									const jsonWriteStream = createWriteStream(this.jsonPath, {
-										// u=rw,g=r,o=r
-										mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
-									});
-									jsonWriteStream.write(JSON.stringify(json));
-									// Have the callback trigger resolve
-									jsonWriteStream.end(resolve);
-								} catch (error) {
-									reject(error);
-								}
-							}).then(() => info('Finished saving JSON')),
-						),
-						group(
-							'Model Download',
-							() =>
-								new Promise<void>((resolve, reject) => {
-									// Get the exact file name for the given quant method
-									const filename = this.findFilenameByQuantMethod(json, quantMethod);
+						new Promise<void>((resolve, reject) => {
+							try {
+								// Save JSON because it has hash and other important stuff
+								const jsonWriteStream = createWriteStream(this.jsonPath, {
+									// u=rw,g=r,o=r
+									mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
+								});
+								jsonWriteStream.write(JSON.stringify(json));
+								// Have the callback trigger resolve
+								jsonWriteStream.end(resolve);
+							} catch (error) {
+								reject(error);
+							}
+						}),
+						new Promise<void>((resolve, reject) => {
+							// Get the exact file name for the given quant method
+							const filename = this.findFilenameByQuantMethod(json, quantMethod);
 
-									if (filename) {
-										this.downloadModel(json.modelId, filename).then(resolve).catch(reject);
-									} else {
-										reject(quantMethod);
-									}
-								}),
-						),
+							if (filename) {
+								this.downloadModel(json.modelId, filename).then(resolve).catch(reject);
+							} else {
+								reject(quantMethod);
+							}
+						}),
 					])
 						.then(() => mainResolve())
 						.catch(mainReject);
