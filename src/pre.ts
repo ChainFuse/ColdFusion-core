@@ -105,8 +105,8 @@ export class PreSetup {
 
 																const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
 																const color = chalk.rgb(
-																	Math.floor(255 - percentage * 2.55), // Reducing red component
-																	Math.floor(255 - percentage * 2.55), // Reducing green component
+																	Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting red component
+																	Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting green component
 																	255, // Keeping blue component at max
 																);
 																info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
