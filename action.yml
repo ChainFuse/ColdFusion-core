@@ -10,6 +10,10 @@ inputs:
     description: The quantitative analysis approach for evaluating AI models, using statistical and mathematical techniques to assess their effectiveness and suitability for specific tasks
     required: true
     default: Q2_K
+  modelDir:
+    description: Location to download model
+    required: true
+    default: ${{ github.repository }}
 # outputs:
 runs:
   using: 'node20'
