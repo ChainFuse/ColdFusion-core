@@ -3,6 +3,7 @@ import { exec } from '@actions/exec';
 import { LlamaChatSession, LlamaContext, LlamaModel, type Token } from 'node-llama-cpp';
 import { arch, cpus, platform } from 'node:os';
 import { format, join, parse } from 'node:path';
+import { graphics } from 'systeminformation';
 import { PreCore } from './pre.js';
 
 if (process.env['COLDFUSION_CORE_PRE_EXECUTED'] !== `${true}`) {
@@ -44,6 +45,14 @@ export class MainCore {
 		return cpus()[0]!.model.includes('Apple') && arch() === 'arm64';
 	}
 
+	private vramAmount() {
+		return new Promise<number>((resolve, reject) => {
+			graphics()
+				.then((data) => resolve(data.controllers.reduce((total, controller) => total + (controller.vram || 0), 0)))
+				.catch(reject);
+		});
+	}
+
 	private async pre() {
 		if (platform() === 'darwin') {
 			if (!this.isMetalSupported()) {
@@ -59,6 +68,7 @@ export class MainCore {
 				endGroup();
 			}
 		}
+		info((await this.vramAmount()).toString());
 	}
 
 	public async main() {
