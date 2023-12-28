@@ -5,11 +5,11 @@ inputs:
   model:
     description: Model to run against. Expects full model name (`-GGUF` prefix optional). Downloads from https://huggingface.co/TheBloke?search_models=GGUF
     required: true
-    default: TheBloke/Mixtral_7Bx2_MoE
+    default: TheBloke/CodeLlama-7B-GGUF
   quantMethod:
     description: The quantitative analysis approach for evaluating AI models, using statistical and mathematical techniques to assess their effectiveness and suitability for specific tasks
     required: true
-    default: Q2_K
+    default: Q4_K_M
   modelDir:
     description: Location to download model. Sub folders for each model will be automatically created
     required: true
