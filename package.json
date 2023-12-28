@@ -11,7 +11,7 @@
 		"build:main:watch": "npm run build:main -- --watch",
 		"build:post": "ncc build src/post.ts --minify --target es2023 --out dist/post",
 		"build:post:watch": "npm run build:post -- --watch",
-		"ts": "tsc",
+		"ts": "tsc --noEmit",
 		"ts:watch": "npm run ts -- --watch"
 	},
 	"repository": {
