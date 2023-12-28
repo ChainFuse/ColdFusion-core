@@ -1,7 +1,7 @@
 import { isFeatureAvailable, restoreCache, saveCache } from '@actions/cache';
 import { error, getInput, info, warning } from '@actions/core';
-import { hashFiles } from '@actions/glob';
 import { format, join, parse } from 'node:path';
+import { FileHasher } from './fileHasher.js';
 
 class PostCore {
 	protected cleanModelName: string;
@@ -30,7 +30,7 @@ class PostCore {
 			info(`${this.modelDir}/**`);
 			let fileHashes = '';
 			try {
-				fileHashes = await hashFiles(`${this.modelDir}/*`, undefined, undefined, true);
+				fileHashes = await FileHasher.hashFiles(`${this.modelDir}/*`);
 			} catch (err) {
 				console.error(err);
 			}

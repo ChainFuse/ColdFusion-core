@@ -1,12 +1,12 @@
 import { isFeatureAvailable, restoreCache } from '@actions/cache';
 import { endGroup, error, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
-import { hashFiles } from '@actions/glob';
 import { Chalk } from 'chalk';
 import { constants, createWriteStream } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { format, join, parse } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { Writable } from 'node:stream';
+import { FileHasher } from './fileHasher.js';
 import type { HuggingFaceRepo } from './types.js';
 
 const chalk = new Chalk({ level: 3 });
@@ -215,7 +215,7 @@ export class PreCore {
 		if (isFeatureAvailable()) {
 			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
 
-			const cacheKey = await restoreCache([this.modelDir], baseCacheString + (await hashFiles(`${this.modelDir}/*`)), [baseCacheString], { concurrentBlobDownloads: true }, true);
+			const cacheKey = await restoreCache([this.modelDir], baseCacheString + (await FileHasher.hashFiles(`${this.modelDir}/*`)), [baseCacheString], { concurrentBlobDownloads: true }, true);
 
 			if (cacheKey) {
 				// TODO: Check if files actually exist
