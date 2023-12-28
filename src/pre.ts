@@ -215,7 +215,7 @@ export class PreCore {
 		if (isFeatureAvailable()) {
 			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
 
-			const cacheKey = await restoreCache([this.modelDir], baseCacheString + (await FileHasher.hashFiles(`${this.modelDir}/*`)), [baseCacheString], { concurrentBlobDownloads: true }, true);
+			const cacheKey = await restoreCache([this.jsonPath, this.modelPath], baseCacheString + (await FileHasher.hashFiles([this.jsonPath, this.modelPath].join('\n'))), [baseCacheString], { concurrentBlobDownloads: true }, true);
 
 			if (cacheKey) {
 				info(chalk.green('Cache found. Checking files'));

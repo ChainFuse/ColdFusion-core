@@ -9,6 +9,8 @@ const chalk = new Chalk({ level: 3 });
 class PostCore {
 	protected cleanModelName: string;
 	protected modelDir: string;
+	protected jsonPath: string;
+	protected modelPath: string;
 
 	constructor() {
 		let parts1 = getInput('model', { required: true }).split('/');
@@ -25,20 +27,31 @@ class PostCore {
 
 		// Do format(parse()) for input validation
 		this.modelDir = join(format(parse(getInput('modelDir', { required: true }))), 'ChainFuse', 'ColdFusion', 'models', this.cleanModelName);
+		this.jsonPath = format({
+			dir: this.modelDir,
+			name: 'repo',
+			ext: '.json',
+		});
+		this.modelPath = format({
+			dir: this.modelDir,
+			name: getInput('quantMethod', { required: true }),
+			ext: '.gguf',
+		});
 	}
 
 	public async main() {
 		if (isFeatureAvailable()) {
 			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
-			info(`${this.modelDir}/**`);
+			info(`${this.modelDir}/*`);
 			let fileHashes = '';
 			try {
-				fileHashes = await FileHasher.hashFiles(`${this.modelDir}/*`);
+				fileHashes = await FileHasher.hashFiles([this.jsonPath, this.modelPath].join('\n'));
 			} catch (err) {
 				console.error(err);
 			}
 
-			const existingCacheKey = await restoreCache([this.modelDir], baseCacheString + fileHashes, [baseCacheString], { lookupOnly: true }, true);
+			// Needs to match exact or else it should save exact
+			const existingCacheKey = await restoreCache([this.jsonPath, this.modelPath], baseCacheString + fileHashes, undefined, { lookupOnly: true }, true);
 
 			if (existingCacheKey) {
 				warning(chalk.yellow("'Skipping cache due to it already existing'"));
