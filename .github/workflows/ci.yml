@@ -85,7 +85,7 @@ jobs:
           name: dist
           path: ${{ github.workspace }}/dist
       - uses: ./
-      - run: Get-ChildItem -Path ${{ runner.temp }}/ChainFuse -Recurse | Format-Table Mode,FullName
+      - run: Get-ChildItem -Path ${{ runner.temp }}/ChainFuse -Recurse | Format-Table Mode,Directory,Name
         shell: pwsh
   publish:
     needs: ['test']
