@@ -87,6 +87,7 @@ jobs:
       - uses: ./
         env:
           NODE_LLAMA_CPP_METAL: false
+          LLAMA_METAL: 0
       - run: Get-ChildItem -Path ${{ runner.temp }}/ChainFuse -Recurse | Format-Table FullName
         shell: pwsh
   publish:
