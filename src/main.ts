@@ -36,10 +36,10 @@ export class MainCore {
 	}
 
 	public async main() {
-		const model = new LlamaModel({
-			modelPath: this.modelPath,
+		const context = new LlamaContext({
+			model: new LlamaModel({ modelPath: this.modelPath }),
+			threads: cpus().length,
 		});
-		const context = new LlamaContext({ model, threads: cpus().length });
 		const session = new LlamaChatSession({ context, printLLamaSystemInfo: false });
 
 		startGroup('User Input');
