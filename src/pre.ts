@@ -65,104 +65,112 @@ export class PreSetup {
 		return null;
 	}
 
-	private downloadModelFromHf(quantMethod: string = getInput('quantMethod', { required: true })) {
-		return new Promise<void>((mainResolve, mainReject) => {
+	private downloadJson() {
+		return new Promise<HuggingFaceRepo>((resolve, reject) => {
 			fetch(new URL(`https://huggingface.co/api/models/TheBloke/${this.cleanModelName}-GGUF`))
-				.then((jsonResponse) => {
-					if (jsonResponse.ok) {
-						jsonResponse
+				.then((response) => {
+					if (response.ok) {
+						response
 							.json()
-							.then((jsonContent) => {
-								const json = jsonContent as HuggingFaceRepo;
+							.then((json) => {
+								resolve(json as HuggingFaceRepo);
+							})
+							.catch(reject);
+					} else {
+						reject(response.status);
+					}
+				})
+				.catch(reject);
+		});
+	}
 
-								// Save JSON because it has hash and other important stuff
-								const jsonWriteStream = createWriteStream(this.jsonPath, {
-									// u=rw,g=r,o=r
-									mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
-								});
-								jsonWriteStream.write(JSON.stringify(json));
-								jsonWriteStream.end();
+	private download(quantMethod: string = getInput('quantMethod', { required: true })) {
+		return new Promise<void>((mainResolve, mainReject) => {
+			this.downloadJson()
+				.then((json) => {
+					// Save JSON because it has hash and other important stuff
+					const jsonWriteStream = createWriteStream(this.jsonPath, {
+						// u=rw,g=r,o=r
+						mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
+					});
+					jsonWriteStream.write(JSON.stringify(json));
+					jsonWriteStream.end();
 
-								// Get the exact file name for the given quant method
-								const filename = this.findFilenameByQuantMethod(json, quantMethod);
+					// Get the exact file name for the given quant method
+					const filename = this.findFilenameByQuantMethod(json, quantMethod);
 
-								if (filename) {
-									const modelDownloadUrl = new URL(join(json.modelId, 'resolve', 'main', filename), 'https://huggingface.co');
-									modelDownloadUrl.searchParams.set('download', true.toString());
+					if (filename) {
+						const modelDownloadUrl = new URL(join(json.modelId, 'resolve', 'main', filename), 'https://huggingface.co');
+						modelDownloadUrl.searchParams.set('download', true.toString());
 
-									fetch(modelDownloadUrl)
-										.then((modelResponse) => {
-											if (modelResponse.ok) {
-												mainResolve(
-													new Promise(async (resolve, reject) => {
-														const totalSize = parseInt(modelResponse.headers.get('Content-Length') ?? '0', 10);
-														if (totalSize === 0) warning('Total size unknown, progress will not be shown.');
-														let receivedSize = 0;
-														let lastUpdate = Date.now();
+						fetch(modelDownloadUrl)
+							.then((modelResponse) => {
+								if (modelResponse.ok) {
+									mainResolve(
+										new Promise(async (resolve, reject) => {
+											const totalSize = parseInt(modelResponse.headers.get('Content-Length') ?? '0', 10);
+											if (totalSize === 0) warning('Total size unknown, progress will not be shown.');
+											let receivedSize = 0;
+											let lastUpdate = Date.now();
 
-														const updateProgress = () => {
-															if (Date.now() - lastUpdate > 1000) {
-																lastUpdate = Date.now();
+											const updateProgress = () => {
+												if (Date.now() - lastUpdate > 1000) {
+													lastUpdate = Date.now();
 
-																const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
-																const color = chalk.rgb(
-																	Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting red component
-																	Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting green component
-																	255, // Keeping blue component at max
-																);
-																info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
-															}
-														};
+													const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
+													const color = chalk.rgb(
+														Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting red component
+														Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting green component
+														255, // Keeping blue component at max
+													);
+													info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
+												}
+											};
 
-														const modelWriter = Writable.toWeb(
-															createWriteStream(this.modelPath, {
-																// u=rw,g=r,o=r
-																mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
-															}),
-														);
+											const modelWriter = Writable.toWeb(
+												createWriteStream(this.modelPath, {
+													// u=rw,g=r,o=r
+													mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
+												}),
+											);
 
-														const writer = modelWriter.getWriter();
+											const writer = modelWriter.getWriter();
 
-														if (modelResponse.body) {
-															try {
-																startGroup('Model Download');
-																performance.mark('model-start-download');
-																for await (const chunk of modelResponse.body) {
-																	writer.write(chunk);
-																	receivedSize += chunk.length;
-																	updateProgress();
-																}
-																performance.mark('model-end-download');
-																// Declare here so it already starts closing
-																const writerClosing = writer.close();
-																const temp = performance.measure('model-download', 'model-start-download', 'model-end-download');
-																info(`Downloaded in ${temp.duration / 1000}s`);
-																endGroup();
-																// Make sure it really is done
-																resolve(writerClosing);
-															} catch (error) {
-																await writer.abort();
-																reject(error);
-															}
-														} else {
-															reject('Bad download body');
-														}
-													}),
-												);
+											if (modelResponse.body) {
+												try {
+													startGroup('Model Download');
+													performance.mark('model-start-download');
+													for await (const chunk of modelResponse.body) {
+														writer.write(chunk);
+														receivedSize += chunk.length;
+														updateProgress();
+													}
+													performance.mark('model-end-download');
+													// Declare here so it already starts closing
+													const writerClosing = writer.close();
+													const temp = performance.measure('model-download', 'model-start-download', 'model-end-download');
+													info(`Downloaded in ${temp.duration / 1000}s`);
+													endGroup();
+													// Make sure it really is done
+													resolve(writerClosing);
+												} catch (error) {
+													await writer.abort();
+													reject(error);
+												}
 											} else {
-												mainReject(modelResponse.status);
+												reject('Bad download body');
 											}
-										})
-										.catch(mainReject);
-
-									mainResolve();
+										}),
+									);
 								} else {
-									mainReject(quantMethod);
+									mainReject(modelResponse.status);
 								}
 							})
 							.catch(mainReject);
+
+						mainResolve();
 					} else {
-						mainReject(jsonResponse.status);
+						mainReject(quantMethod);
 					}
 				})
 				.catch(mainReject);
@@ -185,14 +193,14 @@ export class PreSetup {
 				// TODO: Check if files actually exist
 			} else {
 				try {
-					await this.downloadModelFromHf();
+					await this.download();
 				} catch (err) {
 					error((err as Error | string | number).toString());
 				}
 			}
 		} else {
 			try {
-				await this.downloadModelFromHf();
+				await this.download();
 			} catch (err) {
 				error((err as Error | string | number).toString());
 			}
