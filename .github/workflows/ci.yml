@@ -73,6 +73,8 @@ jobs:
         with:
           disable-sudo: true
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: ./
   publish:
     needs: ['test']
     runs-on: ubuntu-latest
