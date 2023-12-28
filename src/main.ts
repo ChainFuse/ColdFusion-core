@@ -42,6 +42,7 @@ export class MainCore {
 			let stdError = '';
 
 			startGroup('macOS Metal Check');
+			info(cpus()[0]!.model);
 			exec('system_profiler', ['SPDisplaysDataType'], {
 				listeners: {
 					stdout: (data: Buffer) => {
