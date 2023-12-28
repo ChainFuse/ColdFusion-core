@@ -77,6 +77,13 @@ jobs:
           disable-sudo: true
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Delete old compiled action
+        run: rm -rv dist
+        shell: bash
+      - uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
+        with:
+          name: dist
+          path: ${{ github.workspace }}/dist
       - uses: ./
   publish:
     needs: ['test']
