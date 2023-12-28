@@ -1,4 +1,4 @@
-import { endGroup, error, getInput, info, startGroup } from '@actions/core';
+import { debug, endGroup, error, getInput, info, startGroup } from '@actions/core';
 import { exec } from '@actions/exec';
 import { LlamaChatSession, LlamaContext, LlamaModel, type Token } from 'node-llama-cpp';
 import { arch, cpus, platform } from 'node:os';
@@ -55,12 +55,14 @@ export class MainCore {
 	}
 
 	private async pre() {
+		info(`Detected platform: ${platform()}`);
 		if (platform() === 'darwin') {
 			if (!this.isMetalSupported()) {
 				startGroup('macOS non metal rebuild');
 
 				await exec('node-llama-cpp', ['download', '--no-metal', '--arch', arch(), '--nodeTarget', version], {
 					listeners: {
+						debug: (data: string) => debug(data),
 						stdout: (data: Buffer) => info(data.toString()),
 						stderr: (data: Buffer) => error(data.toString()),
 					},
@@ -69,7 +71,7 @@ export class MainCore {
 				endGroup();
 			}
 		}
-		info((await this.vramAmount()).toString());
+		info(`VRAM Available: ${(await this.vramAmount()).toString()}`);
 	}
 
 	public async main() {

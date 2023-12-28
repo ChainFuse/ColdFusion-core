@@ -127,7 +127,6 @@ export class PreCore {
 
 				const measurement = performance.measure('model-download', 'model-start-download', 'model-end-download');
 				info(`Downloaded in ${measurement.duration / 1000}s`);
-				endGroup();
 
 				// Make sure it really is done
 				resolve(
@@ -135,6 +134,7 @@ export class PreCore {
 						performance.mark('model-end-write');
 						const measurement2 = performance.measure('model-download', 'model-start-download', 'model-end-write');
 						info(`Saved in ${measurement2.duration / 1000}s`);
+						endGroup();
 					}),
 				);
 			} catch (error) {
