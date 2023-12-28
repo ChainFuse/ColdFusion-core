@@ -131,7 +131,7 @@ export class PreSetup {
 																	updateProgress();
 																}
 																endGroup();
-																resolve(modelWriter.close());
+																resolve(writer.close().then(() => modelWriter.close()));
 															} catch (error) {
 																reject(error);
 															}
