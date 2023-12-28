@@ -5,6 +5,7 @@ import { Chalk } from 'chalk';
 import { constants, createWriteStream } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { format, join, parse } from 'node:path';
+import { performance } from 'node:perf_hooks';
 import { Writable } from 'node:stream';
 import type { HuggingFaceRepo } from './types.js';
 
@@ -125,13 +126,20 @@ export class PreSetup {
 														if (modelResponse.body) {
 															try {
 																startGroup('Model Download');
+																performance.mark('model-start-download');
 																for await (const chunk of modelResponse.body) {
 																	writer.write(chunk);
 																	receivedSize += chunk.length;
 																	updateProgress();
 																}
+																performance.mark('model-end-download');
+																// Declare here so it already starts closing
+																const writerClosing = writer.close();
+																const temp = performance.measure('model-download', 'model-start-download', 'model-end-download');
+																info(`Downloaded in ${temp.duration / 1000}s`);
 																endGroup();
-																resolve(writer.close());
+																// Make sure it really is done
+																resolve(writerClosing);
 															} catch (error) {
 																await writer.abort();
 																reject(error);
