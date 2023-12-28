@@ -97,15 +97,20 @@ export class PreSetup {
 														const totalSize = parseInt(modelResponse.headers.get('Content-Length') ?? '0', 10);
 														if (totalSize === 0) warning('Total size unknown, progress will not be shown.');
 														let receivedSize = 0;
+														let lastUpdate = Date.now();
 
 														const updateProgress = () => {
-															const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
-															const color = chalk.rgb(
-																Math.floor(255 - percentage * 2.55), // Reducing red component
-																Math.floor(255 - percentage * 2.55), // Reducing green component
-																255, // Keeping blue component at max
-															);
-															info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
+															if (Date.now() - lastUpdate > 1000) {
+																lastUpdate = Date.now();
+
+																const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
+																const color = chalk.rgb(
+																	Math.floor(255 - percentage * 2.55), // Reducing red component
+																	Math.floor(255 - percentage * 2.55), // Reducing green component
+																	255, // Keeping blue component at max
+																);
+																info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
+															}
 														};
 
 														const modelWriter = Writable.toWeb(
