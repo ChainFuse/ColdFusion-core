@@ -2,6 +2,7 @@ import { isFeatureAvailable, restoreCache } from '@actions/cache';
 import { exportVariable, getInput } from '@actions/core';
 import { hashFiles } from '@actions/glob';
 import { constants, createWriteStream } from 'node:fs';
+import { mkdir } from 'node:fs/promises';
 import { format, join, parse } from 'node:path';
 import type { HuggingFaceRepo } from './types.js';
 
@@ -97,6 +98,11 @@ export class PreSetup {
 	public async main() {
 		// Do format(parse()) for input validation
 		const modelDir = join(format(parse(getInput('modelDir', { required: true }))), 'ChainFuse', 'ColdFusion', 'models', this.cleanModelName);
+		await mkdir(modelDir, {
+			recursive: true,
+			// u=rwx,g=rx,o=rx
+			mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IXUSR | constants.S_IRGRP | constants.S_IXGRP | constants.S_IROTH | constants.S_IXOTH,
+		});
 
 		if (isFeatureAvailable()) {
 			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
