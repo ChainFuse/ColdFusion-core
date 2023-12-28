@@ -28,7 +28,7 @@ class PostCore {
 		if (isFeatureAvailable()) {
 			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
 			info(`${this.modelDir}/**`);
-			const fileHashes = await hashFiles(`${this.modelDir}/**`);
+			const fileHashes = await hashFiles(`${this.modelDir}/*`);
 
 			const existingCacheKey = await restoreCache([this.modelDir], baseCacheString + fileHashes, [baseCacheString], { lookupOnly: true }, true);
 
