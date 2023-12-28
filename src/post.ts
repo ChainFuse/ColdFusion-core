@@ -30,7 +30,7 @@ class PostSetup {
 
 			try {
 				// 8 to match default download
-				const cacheKey = await saveCache([this.modelDir], baseCacheString + hashFiles(`${this.modelDir}/**`), { uploadConcurrency: 8 }, true);
+				const cacheKey = await saveCache([this.modelDir], baseCacheString + (await hashFiles(`${this.modelDir}/**`)), { uploadConcurrency: 8 }, true);
 
 				if (cacheKey) {
 					info('Saved to cache successfully');

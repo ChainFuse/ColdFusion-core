@@ -215,7 +215,7 @@ export class PreSetup {
 		if (isFeatureAvailable()) {
 			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
 
-			const cacheKey = await restoreCache([this.modelDir], baseCacheString + hashFiles(`${this.modelDir}/**`), [baseCacheString], { concurrentBlobDownloads: true }, true);
+			const cacheKey = await restoreCache([this.modelDir], baseCacheString + (await hashFiles(`${this.modelDir}/**`)), [baseCacheString], { concurrentBlobDownloads: true }, true);
 
 			if (cacheKey) {
 				// TODO: Check if files actually exist
