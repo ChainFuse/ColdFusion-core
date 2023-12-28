@@ -38,7 +38,7 @@ export class MainCore {
 		});
 	}
 
-	private async isMetalSupported() {
+	private isMetalSupported() {
 		if (cpus().length === 0) {
 			return false;
 		}
@@ -57,6 +57,7 @@ export class MainCore {
 	private async pre() {
 		info(`Detected platform: ${platform()}`);
 		if (platform() === 'darwin') {
+			info(`Metal available: ${this.isMetalSupported()}`);
 			if (!this.isMetalSupported()) {
 				startGroup('macOS non metal rebuild');
 
