@@ -107,9 +107,19 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Check for Changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
       - run: git add dist/
       - run: git commit -m "[ci skip] $PREVIOUS_GIT_MESSAGE"
+        if: steps.changes.outputs.changes == 'true'
         shell: bash
         env:
           PREVIOUS_GIT_MESSAGE: ${{ github.event.head_commit.message }}
       - run: git push
+        if: steps.changes.outputs.changes == 'true'
