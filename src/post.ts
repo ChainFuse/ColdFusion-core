@@ -1,4 +1,4 @@
-import { isFeatureAvailable, saveCache } from '@actions/cache';
+import { isFeatureAvailable, restoreCache, saveCache } from '@actions/cache';
 import { error, getInput, info, warning } from '@actions/core';
 import { hashFiles } from '@actions/glob';
 import { format, join, parse } from 'node:path';
@@ -27,17 +27,24 @@ class PostCore {
 	public async main() {
 		if (isFeatureAvailable()) {
 			const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
+			const fileHashes = await hashFiles(`${this.modelDir}/**`);
 
-			try {
-				const cacheKey = await saveCache([this.modelDir], baseCacheString + (await hashFiles(`${this.modelDir}/**`)), undefined, true);
+			const existingCacheKey = await restoreCache([this.modelDir], baseCacheString + fileHashes, [baseCacheString], { lookupOnly: true }, true);
 
-				if (cacheKey) {
-					info('Saved to cache successfully');
-				} else {
-					error('Unknown cache saving error');
+			if (existingCacheKey) {
+				info('Skipping cache due to it already existing');
+			} else {
+				try {
+					const cacheKey = await saveCache([this.modelDir], baseCacheString + fileHashes, undefined, true);
+
+					if (cacheKey) {
+						info('Saved to cache successfully');
+					} else {
+						error('Unknown cache saving error');
+					}
+				} catch (err) {
+					error((err as Error).toString());
 				}
-			} catch (err) {
-				error((err as Error).toString());
 			}
 		} else {
 			warning('Skipping cache save due to unavailable cache service');
