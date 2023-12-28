@@ -13,7 +13,7 @@ inputs:
   modelDir:
     description: Location to download model. Sub folders for each model will be automatically created
     required: true
-    default: ${{ github.repository }}
+    default: ${{ runner.temp }}
 # outputs:
 runs:
   using: 'node20'
