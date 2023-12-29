@@ -1,5 +1,5 @@
 import { isFeatureAvailable, restoreCache } from '@actions/cache';
-import { endGroup, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
+import { endGroup, error, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
 import { Chalk } from 'chalk';
 import { constants, createWriteStream } from 'node:fs';
 import { access, mkdir } from 'node:fs/promises';
@@ -257,7 +257,10 @@ export class PreCore {
 						this.download(false).then(resolve).catch(reject);
 					}
 				})
-				.catch(reject);
+				.catch((reason) => {
+					error(`Failed creating folder and parent(s): ${reason}`);
+					reject(reason);
+				});
 		});
 	}
 }
