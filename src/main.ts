@@ -38,7 +38,7 @@ export class MainCore {
 		});
 	}
 
-	private isMetalSupported() {
+	private get isMetalSupported() {
 		if (cpus().length === 0) {
 			return false;
 		}
@@ -46,7 +46,7 @@ export class MainCore {
 		return cpus()[0]!.model.includes('Apple') && arch() === 'arm64';
 	}
 
-	private vramAmount() {
+	private get vramAmount() {
 		return new Promise<number>((resolve, reject) => {
 			graphics()
 				.then((data) => resolve(data.controllers.reduce((total, controller) => total + (controller.vram || 0), 0)))
@@ -56,7 +56,7 @@ export class MainCore {
 
 	private async pre() {
 		if (platform() === 'darwin') {
-			if (!this.isMetalSupported()) {
+			if (!this.isMetalSupported) {
 				await new Promise<void>((resolve, reject) => {
 					startGroup('macOS non metal rebuild');
 
@@ -74,7 +74,7 @@ export class MainCore {
 			}
 		}
 
-		info(`VRAM Available: ${(await this.vramAmount()).toString()}`);
+		info(`VRAM Available: ${(await this.vramAmount).toString()}`);
 	}
 
 	public async main() {
