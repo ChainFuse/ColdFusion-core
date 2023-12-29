@@ -83,7 +83,7 @@ export class MainCore {
 			}
 		}
 
-		info(`VRAM Available: ${(await this.vramAmount).toString()}`);
+		info(`VRAM Available: ${(await this.vramAmount).toString()}mb`);
 	}
 
 	public async main() {
