@@ -87,7 +87,7 @@ export class PreCore {
 	}
 
 	private downloadModelBody(totalSize: number, body: NonNullable<Response['body']>) {
-		return new Promise<void>(async (resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
 			if (totalSize === 0) warning('Total size unknown, progress will not be shown.');
 			let receivedSize = 0;
 			let lastUpdate = Date.now();
@@ -114,35 +114,38 @@ export class PreCore {
 			);
 
 			const writer = modelWriter.getWriter();
+			writer.ready
+				.then(async () => {
+					try {
+						startGroup('Model Download');
+						performance.mark('model-start-download');
+						for await (const chunk of body) {
+							writer.write(chunk);
+							receivedSize += chunk.length;
+							updateProgress();
+						}
+						performance.mark('model-end-download');
+						// Declare here so it already starts closing
+						const writerClosing = writer.close();
 
-			try {
-				startGroup('Model Download');
-				performance.mark('model-start-download');
-				for await (const chunk of body) {
-					writer.write(chunk);
-					receivedSize += chunk.length;
-					updateProgress();
-				}
-				performance.mark('model-end-download');
-				// Declare here so it already starts closing
-				const writerClosing = writer.close();
+						const measurement = performance.measure('model-download', 'model-start-download', 'model-end-download');
+						info(`Downloaded in ${measurement.duration / 1000}s`);
 
-				const measurement = performance.measure('model-download', 'model-start-download', 'model-end-download');
-				info(`Downloaded in ${measurement.duration / 1000}s`);
-
-				// Make sure it really is done
-				resolve(
-					writerClosing.then(() => {
-						performance.mark('model-end-write');
-						const measurement2 = performance.measure('model-download', 'model-start-download', 'model-end-write');
-						info(`Saved in ${measurement2.duration / 1000}s`);
-						endGroup();
-					}),
-				);
-			} catch (error) {
-				await writer.abort();
-				reject(error);
-			}
+						// Make sure it really is done
+						writerClosing
+							.then(resolve)
+							.catch(reject)
+							.finally(() => {
+								performance.mark('model-end-write');
+								const measurement2 = performance.measure('model-download', 'model-start-download', 'model-end-write');
+								info(`Saved in ${measurement2.duration / 1000}s`);
+								endGroup();
+							});
+					} catch (error) {
+						writer.abort().finally(() => reject(error));
+					}
+				})
+				.catch(reject);
 		});
 	}
 
