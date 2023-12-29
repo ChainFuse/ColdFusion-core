@@ -60,7 +60,7 @@ export class MainCore {
 				await new Promise<void>((resolve, reject) => {
 					startGroup('macOS non metal rebuild');
 
-					exec('npx', ['--no', 'node-llama-cpp', 'download', '--no-metal', '--arch', arch, '--nodeTarget', version], {
+					exec('npx', ['--yes', 'node-llama-cpp', 'download', '--no-metal', '--arch', arch, '--nodeTarget', version], {
 						listeners: {
 							debug: (data: string) => debug(data),
 							stdout: (data: Buffer) => info(data.toString()),
