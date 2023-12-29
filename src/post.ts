@@ -45,16 +45,12 @@ class PostCore {
 			if (existingCacheKey) {
 				warning(chalk.yellow("'Skipping cache due to it already existing'"));
 			} else {
-				try {
-					const cacheKey = await saveCache([this.modelDir], baseCacheString + fileHashes, undefined, true);
+				const cacheKey = await saveCache([this.modelDir], baseCacheString + fileHashes, undefined, true);
 
-					if (cacheKey) {
-						info('Saved to cache successfully');
-					} else {
-						error('Unknown cache saving error');
-					}
-				} catch (err) {
-					error((err as Error).toString());
+				if (cacheKey) {
+					info('Saved to cache successfully');
+				} else {
+					error('Unknown cache saving error');
 				}
 			}
 		} else {
