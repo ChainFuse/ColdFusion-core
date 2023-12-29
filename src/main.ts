@@ -1,9 +1,9 @@
 import { debug, endGroup, error, getInput, info, startGroup } from '@actions/core';
 import { exec } from '@actions/exec';
 import { LlamaChatSession, LlamaContext, LlamaModel, type Token } from 'node-llama-cpp';
-import { arch, cpus, platform } from 'node:os';
+import { cpus, platform } from 'node:os';
 import { format, join, parse } from 'node:path';
-import { version } from 'node:process';
+import { arch, version } from 'node:process';
 import { graphics } from 'systeminformation';
 import { PreCore } from './pre.js';
 
@@ -43,7 +43,7 @@ export class MainCore {
 			return false;
 		}
 
-		return cpus()[0]!.model.includes('Apple') && arch() === 'arm64';
+		return cpus()[0]!.model.includes('Apple') && arch === 'arm64';
 	}
 
 	private get vramAmount() {
@@ -60,7 +60,7 @@ export class MainCore {
 				await new Promise<void>((resolve, reject) => {
 					startGroup('macOS non metal rebuild');
 
-					exec('node-llama-cpp', ['download', '--no-metal', '--arch', arch(), '--nodeTarget', version], {
+					exec('node-llama-cpp', ['download', '--no-metal', '--arch', arch, '--nodeTarget', version], {
 						listeners: {
 							debug: (data: string) => debug(data),
 							stdout: (data: Buffer) => info(data.toString()),
