@@ -1,6 +1,6 @@
-import { debug, endGroup, error, getInput, info, startGroup } from '@actions/core';
-import { exec } from '@actions/exec';
+import { endGroup, getInput, info, startGroup } from '@actions/core';
 import { LlamaChatSession, LlamaContext, LlamaModel, type Token } from 'node-llama-cpp';
+import { DownloadLlamaCppCommand } from 'node-llama-cpp/commands';
 import { cpus, platform } from 'node:os';
 import { format, join, parse } from 'node:path';
 import { arch, version } from 'node:process';
@@ -60,16 +60,25 @@ export class MainCore {
 				await new Promise<void>((resolve, reject) => {
 					startGroup('macOS non metal rebuild');
 
-					exec('node-llama-cpp', ['download', '--no-metal', '--arch', arch, '--nodeTarget', version], {
-						listeners: {
-							debug: (data: string) => debug(data),
-							stdout: (data: Buffer) => info(data.toString()),
-							stderr: (data: Buffer) => error(data.toString()),
-						},
+					// exec('node-llama-cpp', ['download', '--no-metal', '--arch', arch, '--nodeTarget', version], {
+					// 	listeners: {
+					// 		debug: (data: string) => debug(data),
+					// 		stdout: (data: Buffer) => info(data.toString()),
+					// 		stderr: (data: Buffer) => error(data.toString()),
+					// 	},
+					// })
+					// 	.then((exitCode) => (exitCode === 0 ? resolve() : reject(exitCode)))
+					// 	.catch(reject)
+					// 	.finally(endGroup);
+
+					DownloadLlamaCppCommand({
+						arch: arch,
+						metal: false,
+						nodeTarget: version,
 					})
-						.then((exitCode) => (exitCode === 0 ? resolve() : reject(exitCode)))
+						.then(resolve)
 						.catch(reject)
-						.finally(() => endGroup());
+						.finally(endGroup);
 				});
 			}
 		}
