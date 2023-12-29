@@ -90,7 +90,10 @@ export class MainCore {
 		await this.pre();
 
 		const context = new LlamaContext({
-			model: new LlamaModel({ modelPath: this.modelPath }),
+			model: new LlamaModel({
+				modelPath: this.modelPath,
+				gpuLayers: await this.vramAmount,
+			}),
 			threads: cpus().length,
 		});
 		const session = new LlamaChatSession({ context, printLLamaSystemInfo: false });
