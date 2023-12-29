@@ -1,6 +1,5 @@
 import { isFeatureAvailable, restoreCache } from '@actions/cache';
 import { endGroup, error, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
-import { Chalk } from 'chalk';
 import { constants, createWriteStream } from 'node:fs';
 import { access, mkdir } from 'node:fs/promises';
 import { format, join, parse } from 'node:path';
@@ -8,8 +7,6 @@ import { performance } from 'node:perf_hooks';
 import { Writable } from 'node:stream';
 import { FileHasher } from './fileHasher.js';
 import type { HuggingFaceRepo } from './types.js';
-
-const chalk = new Chalk({ level: 3 });
 
 export class PreCore {
 	protected cleanModelName: string;
@@ -97,12 +94,7 @@ export class PreCore {
 					lastUpdate = Date.now();
 
 					const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
-					const color = chalk.rgb(
-						Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting red component
-						Math.max(Math.floor(100 + (1 - percentage / 100) * 155), 100), // Adjusting green component
-						255, // Keeping blue component at max
-					);
-					info(`Download progress: ${color(`${percentage.toFixed(2)}%`)}`);
+					info(`Download progress: ${percentage.toFixed(2)}%`);
 				}
 			};
 
@@ -231,28 +223,28 @@ export class PreCore {
 						restoreCache([this.modelPath], baseCacheString + (await FileHasher.hashFiles(this.modelPath)), [baseCacheString], { concurrentBlobDownloads: true }, true)
 							.then((cacheKey) => {
 								if (cacheKey) {
-									info(chalk.green(`Cache found (${cacheKey}). Verifying cache`));
+									info(`Cache found (${cacheKey}). Verifying cache`);
 
 									access(this.modelPath, constants.F_OK)
 										.then(() => {
-											info(chalk.green(`Cache check passed. Using cached`));
+											info(`Cache check passed. Using cached`);
 
 											this.download(false).then(resolve).catch(reject);
 										})
 										.catch(() => {
-											warning(chalk.yellow('Cache check failed. Falling back to download'));
+											warning('Cache check failed. Falling back to download');
 
 											this.download(true).then(resolve).catch(reject);
 										});
 								} else {
-									warning(chalk.yellow('Cache not found. Falling back to download'));
+									warning('Cache not found. Falling back to download');
 
 									this.download(true).then(resolve).catch(reject);
 								}
 							})
 							.catch(reject);
 					} else {
-						warning(chalk.yellow('Cache service not available. Falling back to download'));
+						warning('Cache service not available. Falling back to download');
 
 						this.download(false).then(resolve).catch(reject);
 					}

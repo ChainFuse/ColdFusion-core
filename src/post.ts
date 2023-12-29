@@ -1,10 +1,7 @@
 import { isFeatureAvailable, restoreCache, saveCache } from '@actions/cache';
 import { error, getInput, info, warning } from '@actions/core';
-import { Chalk } from 'chalk';
 import { format, join, parse } from 'node:path';
 import { FileHasher } from './fileHasher.js';
-
-const chalk = new Chalk({ level: 3 });
 
 class PostCore {
 	protected cleanModelName: string;
@@ -43,7 +40,7 @@ class PostCore {
 			const existingCacheKey = await restoreCache([this.modelPath], baseCacheString + fileHashes, undefined, { lookupOnly: true }, true);
 
 			if (existingCacheKey) {
-				warning(chalk.yellow('Skipping cache due to it already existing'));
+				warning('Skipping cache due to it already existing');
 			} else {
 				const cacheKey = await saveCache([this.modelDir], baseCacheString + fileHashes, undefined, true);
 
@@ -54,7 +51,7 @@ class PostCore {
 				}
 			}
 		} else {
-			warning(chalk.yellow('Skipping cache save due to unavailable cache service'));
+			warning('Skipping cache save due to unavailable cache service');
 		}
 	}
 }
