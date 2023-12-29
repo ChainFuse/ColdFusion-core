@@ -5,11 +5,11 @@
 	"description": "",
 	"scripts": {
 		"build": "npm run build:pre && npm run build:main && npm run build:post",
-		"build:pre": "ncc build src/pre.ts --v8-cache --minify --target es2023 --out dist/pre",
+		"build:pre": "ncc build src/pre.ts --v8-cache --target es2023 --out dist/pre",
 		"build:pre:watch": "npm run build:pre -- --watch",
-		"build:main": "ncc build src/main.ts --v8-cache --minify --target es2023 --out dist/main",
+		"build:main": "ncc build src/main.ts --v8-cache --target es2023 --out dist/main",
 		"build:main:watch": "npm run build:main -- --watch",
-		"build:post": "ncc build src/post.ts --v8-cache --minify --target es2023 --out dist/post",
+		"build:post": "ncc build src/post.ts --v8-cache --target es2023 --out dist/post",
 		"build:post:watch": "npm run build:post -- --watch",
 		"ts": "tsc --noEmit",
 		"ts:watch": "npm run ts -- --watch"
