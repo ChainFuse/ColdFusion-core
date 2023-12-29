@@ -109,8 +109,10 @@ export class MainCore {
 		const avgMsPerToken = durationMs / tokenCount;
 		const tokensPerSecond = tokenCount / (durationMs / 1000);
 
+		startGroup('AI Stats');
 		info(`Average ms per token: ${avgMsPerToken}`);
 		info(`Average tokens per second: ${tokensPerSecond}`);
+		endGroup();
 	}
 }
 

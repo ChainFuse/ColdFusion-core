@@ -218,6 +218,7 @@ export class PreCore {
 
 	public main() {
 		return new Promise<void>((resolve, reject) => {
+			info(`Creating folder and parent(s): ${this.modelDir}`);
 			mkdir(this.modelDir, {
 				recursive: true,
 				// u=rwx,g=rx,o=rx
