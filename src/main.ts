@@ -55,21 +55,22 @@ export class MainCore {
 	}
 
 	private async pre() {
-		info(`Detected platform: ${platform()}`);
 		if (platform() === 'darwin') {
-			info(`Metal available: ${this.isMetalSupported()}`);
 			if (!this.isMetalSupported()) {
-				startGroup('macOS non metal rebuild');
+				await new Promise<void>((resolve, reject) => {
+					startGroup('macOS non metal rebuild');
 
-				await exec('node-llama-cpp', ['download', '--no-metal', '--arch', arch(), '--nodeTarget', version], {
-					listeners: {
-						debug: (data: string) => debug(data),
-						stdout: (data: Buffer) => info(data.toString()),
-						stderr: (data: Buffer) => error(data.toString()),
-					},
+					exec('node-llama-cpp', ['download', '--no-metal', '--arch', arch(), '--nodeTarget', version], {
+						listeners: {
+							debug: (data: string) => debug(data),
+							stdout: (data: Buffer) => info(data.toString()),
+							stderr: (data: Buffer) => error(data.toString()),
+						},
+					})
+						.then((exitCode) => (exitCode === 0 ? resolve() : reject(exitCode)))
+						.catch(reject)
+						.finally(() => endGroup());
 				});
-
-				endGroup();
 			}
 		}
 		info(`VRAM Available: ${(await this.vramAmount()).toString()}`);
