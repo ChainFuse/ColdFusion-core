@@ -43,7 +43,7 @@ class PostCore {
 			const existingCacheKey = await restoreCache([this.modelPath], baseCacheString + fileHashes, undefined, { lookupOnly: true }, true);
 
 			if (existingCacheKey) {
-				warning(chalk.yellow("'Skipping cache due to it already existing'"));
+				warning(chalk.yellow('Skipping cache due to it already existing'));
 			} else {
 				const cacheKey = await saveCache([this.modelDir], baseCacheString + fileHashes, undefined, true);
 
