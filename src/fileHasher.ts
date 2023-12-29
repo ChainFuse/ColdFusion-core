@@ -1,16 +1,21 @@
+import { error } from '@actions/core';
 import { create } from '@actions/glob';
 import { createHash } from 'node:crypto';
-import { createReadStream } from 'node:fs';
-import { stat } from 'node:fs/promises';
+import { createReadStream, stat } from 'node:fs';
 
 export class FileHasher {
-	private static async isFile(path: string): Promise<boolean> {
-		try {
-			return (await stat(path)).isFile();
-		} catch (error) {
-			console.error(`Error checking path: ${path}`, error);
-			return false;
-		}
+	private static async isFile(path: string) {
+		return new Promise<boolean>((resolve, reject) => {
+			stat(path, (err, stats) => {
+				if (err) {
+					error(`Error checking path (${path}): ${err}`);
+					resolve(false);
+					reject(err);
+				} else {
+					resolve(stats.isFile());
+				}
+			});
+		});
 	}
 
 	public static hashFiles(incomingGlob: Parameters<typeof create>[0] | ReturnType<typeof create>) {

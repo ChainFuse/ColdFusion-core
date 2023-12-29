@@ -1,7 +1,6 @@
 import { isFeatureAvailable, restoreCache } from '@actions/cache';
 import { endGroup, error, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
-import { constants, createWriteStream } from 'node:fs';
-import { access, mkdir } from 'node:fs/promises';
+import { access, constants, createWriteStream, mkdir } from 'node:fs';
 import { format, join, parse } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { Writable } from 'node:stream';
@@ -211,48 +210,52 @@ export class PreCore {
 	public main() {
 		return new Promise<void>((resolve, reject) => {
 			info(`Creating folder and parent(s): ${this.modelDir}`);
-			mkdir(this.modelDir, {
-				recursive: true,
-				// u=rwx,g=rx,o=rx
-				mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IXUSR | constants.S_IRGRP | constants.S_IXGRP | constants.S_IROTH | constants.S_IXOTH,
-			})
-				.then(async () => {
-					if (isFeatureAvailable()) {
-						const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
-
-						restoreCache([this.modelPath], baseCacheString + (await FileHasher.hashFiles(this.modelPath)), [baseCacheString], { concurrentBlobDownloads: true }, true)
-							.then((cacheKey) => {
-								if (cacheKey) {
-									info(`Cache found (${cacheKey}). Verifying cache`);
-
-									access(this.modelPath, constants.F_OK)
-										.then(() => {
-											info(`Cache check passed. Using cached`);
-
-											this.download(false).then(resolve).catch(reject);
-										})
-										.catch(() => {
-											warning('Cache check failed. Falling back to download');
-
-											this.download(true).then(resolve).catch(reject);
-										});
-								} else {
-									warning('Cache not found. Falling back to download');
-
-									this.download(true).then(resolve).catch(reject);
-								}
-							})
-							.catch(reject);
+			mkdir(
+				this.modelDir,
+				{
+					recursive: true,
+					// u=rwx,g=rx,o=rx
+					mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IXUSR | constants.S_IRGRP | constants.S_IXGRP | constants.S_IROTH | constants.S_IXOTH,
+				},
+				async (err) => {
+					if (err) {
+						error(`Failed creating folder and parent(s): ${err}`);
+						reject(err);
 					} else {
-						warning('Cache service not available. Falling back to download');
+						if (isFeatureAvailable()) {
+							const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
 
-						this.download(false).then(resolve).catch(reject);
+							restoreCache([this.modelPath], baseCacheString + (await FileHasher.hashFiles(this.modelPath)), [baseCacheString], { concurrentBlobDownloads: true }, true)
+								.then((cacheKey) => {
+									if (cacheKey) {
+										info(`Cache found (${cacheKey}). Verifying cache`);
+
+										access(this.modelPath, constants.F_OK, (err) => {
+											if (err) {
+												warning('Cache check failed. Falling back to download');
+
+												this.download(true).then(resolve).catch(reject);
+											} else {
+												info(`Cache check passed. Using cached`);
+
+												this.download(false).then(resolve).catch(reject);
+											}
+										});
+									} else {
+										warning('Cache not found. Falling back to download');
+
+										this.download(true).then(resolve).catch(reject);
+									}
+								})
+								.catch(reject);
+						} else {
+							warning('Cache service not available. Falling back to download');
+
+							this.download(false).then(resolve).catch(reject);
+						}
 					}
-				})
-				.catch((reason) => {
-					error(`Failed creating folder and parent(s): ${reason}`);
-					reject(reason);
-				});
+				},
+			);
 		});
 	}
 }
