@@ -73,6 +73,7 @@ export class MainCore {
 				});
 			}
 		}
+
 		info(`VRAM Available: ${(await this.vramAmount()).toString()}`);
 	}
 
