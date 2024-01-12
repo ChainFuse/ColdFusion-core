@@ -40,7 +40,7 @@ jobs:
       - name: Prepare cache
         id: ncc-cache
         run: echo "NCC_CACHE_DIR=$(npx ncc cache dir)" >> $GITHUB_OUTPUT
-      - uses: actions/cache/restore@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+      - uses: actions/cache/restore@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
         with:
           path: |
             ${{ steps.ncc-cache.outputs.NCC_CACHE_DIR }}
@@ -51,7 +51,7 @@ jobs:
       - run: npm run build:pre
       - run: npm run build:main
       - run: npm run build:post
-      - uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+      - uses: actions/cache/save@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
         with:
           path: |
             ${{ steps.ncc-cache.outputs.NCC_CACHE_DIR }}
