@@ -1,262 +1,168 @@
-import { isFeatureAvailable, restoreCache } from '@actions/cache';
-import { endGroup, error, exportVariable, getInput, info, startGroup, warning } from '@actions/core';
-import { access, constants, createWriteStream, mkdir } from 'node:fs';
-import { format, join, parse } from 'node:path';
-import { performance } from 'node:perf_hooks';
-import { Writable } from 'node:stream';
-import { FileHasher } from './fileHasher.js';
-import type { HuggingFaceRepo } from './types.js';
+import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
+import { exportVariable, getBooleanInput, getInput, info, warning } from '@actions/core';
+import { exec } from '@actions/exec';
+import { getOctokit } from '@actions/github';
+import { cacheFile, downloadTool } from '@actions/tool-cache';
+import { Buffer } from 'node:buffer';
+import { createHash, timingSafeEqual } from 'node:crypto';
+import { createReadStream } from 'node:fs';
+import { constants, mkdir } from 'node:fs/promises';
+import { clean, coerce, satisfies, type SemVer } from 'semver';
+import { BaseCore } from './base.js';
 
-export class PreCore {
-	protected cleanModelName: string;
-	protected modelDir: string;
-	protected jsonPath: string;
-	protected modelPath: string;
+export class PreCore extends BaseCore {
+	private requested: SemVer | null;
 
 	constructor() {
-		exportVariable('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
+		super();
 
-		let parts1 = getInput('model', { required: true }).split('/');
+		const rawRequested = getInput('ollama-version', { required: true, trimWhitespace: true });
 
-		// Remove "TheBloke" from the array if it exists
-		parts1 = parts1.filter((part) => part.toLowerCase() !== 'TheBloke'.toLowerCase());
+		if (rawRequested.trim().toLowerCase() === 'latest') {
+			this.requested = null;
+		} else {
+			this.requested = coerce(rawRequested);
 
-		let parts2 = parts1.join('/').split('-');
-
-		// Remove "GGUF" from the array if it exists
-		parts2 = parts2.filter((part) => part.toLowerCase() !== 'GGUF'.toLowerCase());
-
-		this.cleanModelName = parts2.join('-');
-
-		// Do format(parse()) for input validation
-		this.modelDir = join(format(parse(getInput('modelDir', { required: true }))), 'ChainFuse', 'ColdFusion', 'models', this.cleanModelName);
-		this.jsonPath = format({
-			dir: this.modelDir,
-			name: 'repo',
-			ext: '.json',
-		});
-		this.modelPath = format({
-			dir: this.modelDir,
-			name: getInput('quantMethod', { required: true }),
-			ext: '.gguf',
-		});
-	}
-
-	private findFilenameByQuantMethod(data: HuggingFaceRepo, quantMethod: string = getInput('quantMethod', { required: true })) {
-		for (const sibling of data.siblings) {
-			const filename = sibling.rfilename;
-
-			// Check if the filename matches the desired pattern
-			if (filename.toLowerCase().endsWith('.gguf')) {
-				const parts = filename.split('.');
-				// Ensure there are enough parts in the filename
-				if (parts.length > 2) {
-					// Get the second-to-last part for the quant method
-					const fileQuantMethod = parts[parts.length - 2];
-					if (fileQuantMethod?.toLowerCase() === quantMethod.toLowerCase()) {
-						return filename; // Return the whole filename
-					}
-				}
+			if (this.requested === null) {
+				throw new Error('Invalid version requested');
 			}
 		}
 
-		return null;
+		exportVariable('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
 	}
 
-	private downloadJson() {
-		return new Promise<HuggingFaceRepo>((resolve, reject) => {
-			fetch(new URL(`https://huggingface.co/api/models/TheBloke/${this.cleanModelName}-GGUF`))
-				.then((response) => {
-					if (response.ok) {
-						response
-							.json()
-							.then((json) => {
-								resolve(json as HuggingFaceRepo);
-							})
-							.catch(reject);
-					} else {
-						reject(response.status);
-					}
+	private static get ollamaInstalled() {
+		return exec('ollama', undefined, { silent: true })
+			.then((exitCode) => {
+				console.debug('ollama exit code', exitCode);
+				return true;
+			})
+			.catch();
+	}
+
+	private get ollamaVersion() {
+		if (this.requested) {
+			return getOctokit(getInput('token', { required: true, trimWhitespace: true }))
+				.rest.repos.listReleases({
+					owner: 'ollama',
+					repo: 'ollama',
+					per_page: 100,
 				})
-				.catch(reject);
-		});
-	}
-
-	private downloadModelBody(totalSize: number, body: NonNullable<Response['body']>) {
-		return new Promise<void>((resolve, reject) => {
-			if (totalSize === 0) warning('Total size unknown, progress will not be shown.');
-			let receivedSize = 0;
-			let lastUpdate = Date.now();
-
-			const updateProgress = () => {
-				if (Date.now() - lastUpdate > 1000) {
-					lastUpdate = Date.now();
-
-					const percentage = totalSize ? (receivedSize / totalSize) * 100 : 0;
-					info(`Download progress: ${percentage.toFixed(2)}%`);
-				}
-			};
-
-			const modelWriter = Writable.toWeb(
-				createWriteStream(this.modelPath, {
-					// u=rw,g=r,o=r
-					mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
-				}),
-			);
-
-			const writer = modelWriter.getWriter();
-			writer.ready
-				.then(async () => {
-					try {
-						startGroup('Model Download');
-						performance.mark('model-start-download');
-						for await (const chunk of body) {
-							writer.write(chunk);
-							receivedSize += chunk.length;
-							updateProgress();
-						}
-						performance.mark('model-end-download');
-						// Declare here so it already starts closing
-						const writerClosing = writer.close();
-
-						const measurement = performance.measure('model-download', 'model-start-download', 'model-end-download');
-						info(`Downloaded in ${measurement.duration / 1000}s`);
-
-						// Make sure it really is done
-						writerClosing
-							.then(resolve)
-							.catch(reject)
-							.finally(() => {
-								performance.mark('model-end-write');
-								const measurement2 = performance.measure('model-download', 'model-start-download', 'model-end-write');
-								info(`Saved in ${measurement2.duration / 1000}s`);
-								endGroup();
-							});
-					} catch (error) {
-						writer.abort().finally(() => reject(error));
-					}
-				})
-				.catch(reject);
-		});
-	}
-
-	private downloadModel(modelId: string, filename: string) {
-		const modelDownloadUrl = new URL(join(modelId, 'resolve', 'main', filename), 'https://huggingface.co');
-		modelDownloadUrl.searchParams.set('download', true.toString());
-
-		return new Promise<void>((resolve, reject) => {
-			fetch(modelDownloadUrl)
-				.then((response) => {
-					if (response.ok) {
-						if (response.body) {
-							this.downloadModelBody(parseInt(response.headers.get('Content-Length') ?? '0', 10), response.body)
-								.then(resolve)
-								.catch(reject);
+				.then(({ data: releases }) => {
+					return releases.find((release) => {
+						const temp = clean(release.tag_name);
+						if (temp) {
+							return satisfies(this.requested!, temp);
 						} else {
-							reject('Bad download body');
+							return false;
 						}
-					} else {
-						reject(response.status);
-					}
+					});
 				})
-				.catch(reject);
+				.catch((e) => {
+					throw e;
+				});
+		} else {
+			return getOctokit(getInput('token', { required: true, trimWhitespace: true }))
+				.rest.repos.getLatestRelease({
+					owner: 'ollama',
+					repo: 'ollama',
+				})
+				.then(({ data }) => data)
+				.catch((e) => {
+					throw e;
+				});
+		}
+
+		// const matchingRelease = releases.find((release) => semver.satisfies(release.tag_name, this.requested));
+
+		// if (matchingRelease) {
+		// 	const version = matchingRelease.tag_name;
+		// 	console.log(`Matching version found: ${version}`);
+		// } else {
+		// 	console.log(`No matching version found for ${this.requested}`);
+		// }
+	}
+
+	private calculateFileHash(filePath: string, hashType: string) {
+		return new Promise<string>((resolve, reject) => {
+			const hash = createHash(hashType);
+			const stream = createReadStream(filePath);
+
+			stream.on('error', (err) => reject(`Error reading the file: ${err.message}`));
+			stream.on('data', (chunk) => hash.update(chunk));
+			stream.on('end', () => resolve(hash.digest('hex')));
 		});
 	}
 
-	private download(downloadModel: boolean = false, quantMethod: string = getInput('quantMethod', { required: true })) {
-		return new Promise<void>((mainResolve, mainReject) => {
-			this.downloadJson()
-				.then((json) => {
-					const promises = [
-						new Promise<void>((resolve, reject) => {
-							try {
-								// Save JSON because it has hash and other important stuff
-								const jsonWriteStream = createWriteStream(this.jsonPath, {
-									// u=rw,g=r,o=r
-									mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IRGRP | constants.S_IROTH,
-								});
-								jsonWriteStream.write(JSON.stringify(json));
-								// Have the callback trigger resolve
-								jsonWriteStream.end(resolve);
-							} catch (error) {
-								reject(error);
+	private installOllama() {
+		return this.ollamaVersion.then((release) => {
+			const executableAsset = release?.assets.find((asset) => asset.name.toLowerCase().includes('darwin') && !asset.name.toLowerCase().endsWith('.zip'));
+			const hashAsset = release?.assets.find((asset) => /^sha\d{3}sum/i.test(asset.name.toLowerCase()));
+			if (executableAsset && hashAsset) {
+				return Promise.all([
+					downloadTool(executableAsset!.browser_download_url, '/usr/local/bin/ollama'),
+					fetch(new URL(hashAsset!.browser_download_url))
+						.then((response) => response.text())
+						.then((hashFile) => {
+							const lines = hashFile.split('\n');
+							const line = lines.find((line) => line.endsWith(executableAsset!.name));
+							if (line) {
+								return line;
+							} else {
+								throw new Error('file not in hashes', { cause: lines });
 							}
 						}),
-					];
-
-					if (downloadModel) {
-						promises.push(
-							new Promise<void>((resolve, reject) => {
-								// Get the exact file name for the given quant method
-								const filename = this.findFilenameByQuantMethod(json, quantMethod);
-
-								if (filename) {
-									this.downloadModel(json.modelId, filename).then(resolve).catch(reject);
-								} else {
-									reject(quantMethod);
-								}
-							}),
-						);
-					}
-
-					Promise.all(promises)
-						.then(() => mainResolve())
-						.catch(mainReject);
-				})
-				.catch(mainReject);
+				]).then(([ollamaToolGuid, ollamaHashLine]) => {
+					const hashType = /^sha\d{3}/i.exec(hashAsset!.name.toLowerCase())![0];
+					const [expectedHash] = ollamaHashLine.split(' ');
+					return this.calculateFileHash(ollamaToolGuid, hashType).then((computedHash) => {
+						if (timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(expectedHash!, 'hex'))) {
+							return cacheFile(ollamaToolGuid, '/usr/local/bin/ollama', 'ollama', coerce(release!.tag_name)!.toString());
+						} else {
+							throw new Error('Hash mismatch', { cause: JSON.stringify({ expected: expectedHash, computed: computedHash }) });
+						}
+					});
+				});
+			} else {
+				throw new Error('Executable and hash not found', { cause: JSON.stringify({ executableAsset, hashAsset }) });
+			}
 		});
+
+		// https://medium.com/@chhaybunsy/unleash-your-machine-learning-models-how-to-customize-ollamas-storage-directory-c9ea1ea2961a
 	}
 
-	public main() {
-		return new Promise<void>((resolve, reject) => {
-			info(`Creating folder and parent(s): ${this.modelDir}`);
-			mkdir(
-				this.modelDir,
-				{
+	public async main() {
+		info(`Creating folder and parent(s): ${this.modelDir}`);
+
+		/**
+		 * @link https://github.com/nischalj10/headless-ollama/blob/master/preload.sh
+		 * Install ollama
+		 */
+		return PreCore.ollamaInstalled
+			.then(() => {
+				if (getBooleanInput('check-latest', { trimWhitespace: true })) {
+					/**
+					 * @todo
+					 * */
+				}
+			})
+			.catch(() => {
+				return this.installOllama();
+			})
+			.finally(() =>
+				mkdir(this.modelDir, {
 					recursive: true,
 					// u=rwx,g=rx,o=rx
 					mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IXUSR | constants.S_IRGRP | constants.S_IXGRP | constants.S_IROTH | constants.S_IXOTH,
-				},
-				async (err) => {
-					if (err) {
-						error(`Failed creating folder and parent(s): ${err}`);
-						reject(err);
-					} else {
-						if (isFeatureAvailable()) {
-							const baseCacheString = `coldfusion-core-${this.cleanModelName}-`;
-
-							restoreCache([this.modelPath], baseCacheString + (await FileHasher.hashFiles(this.modelPath)), [baseCacheString], { concurrentBlobDownloads: true }, true)
-								.then((cacheKey) => {
-									if (cacheKey) {
-										info(`Cache found (${cacheKey}). Verifying cache`);
-
-										access(this.modelPath, constants.F_OK, (err) => {
-											if (err) {
-												warning('Cache check failed. Falling back to download');
-
-												this.download(true).then(resolve).catch(reject);
-											} else {
-												info(`Cache check passed. Using cached`);
-
-												this.download(false).then(resolve).catch(reject);
-											}
-										});
-									} else {
-										warning('Cache not found. Falling back to download');
-
-										this.download(true).then(resolve).catch(reject);
-									}
-								})
-								.catch(reject);
+				})
+					.then(() => {
+						if (isGhCacheAvailable()) {
 						} else {
 							warning('Cache service not available. Falling back to download');
-
-							this.download(false).then(resolve).catch(reject);
 						}
-					}
-				},
+					})
+					.catch(),
 			);
-		});
 	}
 }
 

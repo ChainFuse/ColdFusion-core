@@ -2,26 +2,37 @@ name: 'ColdFusion/core'
 author: 'ChainFuse'
 description: 'TODO'
 inputs:
+  token:
+    description: Used to pull node distributions from ollama. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+  ollama-version:
+    description: 'Version Spec of the version to use. Examples: latest, 12.x, 10.15.1, >=10.15.0.'
+  check-latest:
+    description: 'Set this option if you want the action to check for the latest available version of ollama that satisfies the version spec.'
+    default: false
   model:
-    description: Model to run against. Expects full model name (`-GGUF` prefix optional). Downloads from https://huggingface.co/TheBloke?search_models=GGUF
+    description: Model to run against. See https://ollama.com/library
     required: true
-    default: TheBloke/CodeLlama-7B-GGUF
-  quantMethod:
-    description: The quantitative analysis approach for evaluating AI models, using statistical and mathematical techniques to assess their effectiveness and suitability for specific tasks
-    required: true
-    default: Q4_K_M
+    default: llama3.1
+  cache:
+    description: 'Set this option to true to enable caching.'
+    default: true
   modelDir:
     description: Location to download model. Sub folders for each model will be automatically created
     required: true
     default: ${{ runner.temp }}
-# outputs:
+outputs:
+  cache-hit:
+    description: 'A boolean value to indicate if a cache was hit.'
+  ollama-version:
+    description: 'The installed ollama version.'
 runs:
   using: 'node20'
   pre: 'dist/pre/index.js'
   # pre-if:
   main: 'dist/main/index.js'
+  post-if: success()
   post: 'dist/post/index.js'
-  # post-if:
 branding:
   color: 'blue'
   icon: 'cloud-off'
