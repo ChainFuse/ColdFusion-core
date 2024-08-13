@@ -99,8 +99,9 @@ jobs:
         if: always() && runner.os != 'Windows'
         shell: pwsh
       - run: ls -liA /Library/LaunchDaemons/
-        if: always() && runner.os != 'Windows'
-        shell: pwsh
+        if: always() && runner.os == 'macOS'
+      - run: launchctl list
+        if: always() && runner.os == 'macOS'
       - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table FullName
         if: always()
         shell: pwsh
