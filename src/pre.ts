@@ -3,7 +3,7 @@ import { addPath, endGroup, error, exportVariable, getBooleanInput, getInput, in
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
 import { mkdirP } from '@actions/io';
-import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip, find } from '@actions/tool-cache';
+import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { chmod, constants, stat } from 'node:fs/promises';
@@ -24,13 +24,8 @@ export class PreCore extends BaseCore {
 	}
 
 	private get ollamaInstalled() {
-		console.info('ollama', this.requestedOllamaVersion, find('ollama', this.requestedOllamaVersion), join(find('ollama', this.requestedOllamaVersion), '..'), join(find('ollama', this.requestedOllamaVersion), '..', '..'));
-		console.info('exec', this.ollamaPath);
 		return exec(this.ollamaPath, undefined, { silent: true })
-			.then((exitCode) => {
-				console.debug('ollama exit code', exitCode);
-				return true;
-			})
+			.then(() => true)
 			.catch((e) => {
 				error(`find ${e}`);
 				throw e;
