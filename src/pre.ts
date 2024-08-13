@@ -2,7 +2,7 @@ import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
 import { addPath, endGroup, exportVariable, getBooleanInput, getInput, info, startGroup, warning } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
-import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip } from '@actions/tool-cache';
+import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip, find } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { constants, mkdir } from 'node:fs/promises';
@@ -23,13 +23,15 @@ export class PreCore extends BaseCore {
 		exportVariable('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
 	}
 
-	private static get ollamaInstalled() {
-		return exec('ollama', undefined, { silent: true })
+	private get ollamaInstalled() {
+		return exec(find('ollama', this.requestedOllamaVersion), undefined, { silent: true })
 			.then((exitCode) => {
 				console.debug('ollama exit code', exitCode);
 				return true;
 			})
-			.catch();
+			.catch((e) => {
+				throw e;
+			});
 	}
 
 	private get ollamaVersionHttp() {
@@ -158,7 +160,7 @@ export class PreCore extends BaseCore {
 		 */
 		startGroup('Ollama installation');
 		info(`Checking if ollama is installed`);
-		return PreCore.ollamaInstalled
+		return this.ollamaInstalled
 			.then(() => {
 				if (this.forceCheck) {
 					/**
@@ -171,7 +173,7 @@ export class PreCore extends BaseCore {
 				return this.installOllama();
 			})
 			.finally(async () => {
-				info(`Verifying ollama is usable ${await PreCore.ollamaInstalled}`);
+				info(`Verifying ollama is usable ${await this.ollamaInstalled}`);
 				endGroup();
 				info(`Creating folder and parent(s): ${this.modelDir}`);
 				return mkdir(this.modelDir, {
