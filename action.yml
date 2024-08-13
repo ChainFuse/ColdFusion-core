@@ -16,6 +16,7 @@ inputs:
     default: ${{ runner.arch }}
   check-latest:
     description: 'Set this option if you want the action to check for the latest available version of ollama that satisfies the version spec.'
+    deprecationMessage: 'Not yet implemented'
     default: false
   model:
     description: Model to run against. See https://ollama.com/library
