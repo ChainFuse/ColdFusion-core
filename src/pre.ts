@@ -88,7 +88,7 @@ export class PreCore extends BaseCore {
 
 			if (executableAsset && hashAsset) {
 				const isArchive = ['.zip', '.7z', '.pkg', '.tar.gz'].some((extension) => executableAsset!.name.toLowerCase().endsWith(extension));
-				info(`Downloading ${isArchive ? 'archive' : 'executable'} to ${tmpdir()}`);
+				info(`Downloading ${executableAsset.name} to ${tmpdir()}`);
 
 				return Promise.all([
 					// Download to tmp if archive otherwise straight to destination
