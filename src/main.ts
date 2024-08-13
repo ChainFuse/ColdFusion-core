@@ -22,6 +22,8 @@ export class MainCore extends BaseCore {
 				throw new Error('Metal is not supported on this system', { cause: cpus()[0]!.model });
 			}
 		}
+
+		// Setup service
 	}
 
 	public async main() {
