@@ -11,8 +11,7 @@
 		"build:main:watch": "npm run build:main -- --watch",
 		"build:post": "ncc build src/post.ts --v8-cache --target es2023 --out dist/post",
 		"build:post:watch": "npm run build:post -- --watch",
-		"ts": "tsc --noEmit",
-		"ts:watch": "npm run ts -- --watch"
+		"ts": "tsc --noEmit"
 	},
 	"repository": {
 		"type": "git",
