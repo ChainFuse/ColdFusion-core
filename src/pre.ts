@@ -6,26 +6,19 @@ import { cacheFile, downloadTool } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { constants, mkdir } from 'node:fs/promises';
-import { clean, coerce, satisfies, type SemVer } from 'semver';
+import { clean, coerce, satisfies } from 'semver';
 import { BaseCore } from './base.js';
 import { FileHasher } from './fileHasher.js';
 
 export class PreCore extends BaseCore {
-	private requested: SemVer | null;
+	private requested: ReturnType<typeof coerce>;
 
 	constructor() {
 		super();
 
-		const rawRequested = getInput('ollama-version', { required: true, trimWhitespace: true });
-
-		if (rawRequested.trim().toLowerCase() === 'latest') {
-			this.requested = null;
-		} else {
-			this.requested = coerce(rawRequested);
-
-			if (this.requested === null) {
-				throw new Error('Invalid version requested');
-			}
+		this.requested = coerce(getInput('ollama-version', { required: true, trimWhitespace: true }));
+		if (this.requested === null) {
+			throw new Error('Invalid version requested');
 		}
 
 		exportVariable('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
