@@ -42,11 +42,7 @@ export class PreCore extends BaseCore {
 					this.requestedOllamaVersion,
 				);
 
-				return data.find((release) => {
-					console.info('release', this.requestedOllamaVersion, release.tag_name, clean(release.tag_name)! === targetVersion);
-
-					return clean(release.tag_name)! === targetVersion;
-				});
+				return data.find((release) => clean(release.tag_name)! === targetVersion);
 			})
 			.catch((e) => {
 				throw e;
