@@ -4,11 +4,11 @@ import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
 import { cacheFile, downloadTool } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
-import { createHash, timingSafeEqual } from 'node:crypto';
-import { createReadStream } from 'node:fs';
+import { timingSafeEqual } from 'node:crypto';
 import { constants, mkdir } from 'node:fs/promises';
 import { clean, coerce, satisfies, type SemVer } from 'semver';
 import { BaseCore } from './base.js';
+import { FileHasher } from './fileHasher.js';
 
 export class PreCore extends BaseCore {
 	private requested: SemVer | null;
@@ -83,17 +83,6 @@ export class PreCore extends BaseCore {
 		// }
 	}
 
-	private calculateFileHash(filePath: string, hashType: string) {
-		return new Promise<string>((resolve, reject) => {
-			const hash = createHash(hashType);
-			const stream = createReadStream(filePath);
-
-			stream.on('error', (err) => reject(`Error reading the file: ${err.message}`));
-			stream.on('data', (chunk) => hash.update(chunk));
-			stream.on('end', () => resolve(hash.digest('hex')));
-		});
-	}
-
 	private installOllama() {
 		return this.ollamaVersion.then((release) => {
 			const executableAsset = release?.assets.find((asset) => asset.name.toLowerCase().includes('darwin') && !asset.name.toLowerCase().endsWith('.zip'));
@@ -115,7 +104,7 @@ export class PreCore extends BaseCore {
 				]).then(([ollamaToolGuid, ollamaHashLine]) => {
 					const hashType = /^sha\d{3}/i.exec(hashAsset!.name.toLowerCase())![0];
 					const [expectedHash] = ollamaHashLine.split(' ');
-					return this.calculateFileHash(ollamaToolGuid, hashType).then((computedHash) => {
+					return FileHasher.hashFile(ollamaToolGuid, hashType).then((computedHash) => {
 						if (timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(expectedHash!, 'hex'))) {
 							return cacheFile(ollamaToolGuid, '/usr/local/bin/ollama', 'ollama', coerce(release!.tag_name)!.toString());
 						} else {
