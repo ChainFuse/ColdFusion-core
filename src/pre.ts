@@ -13,9 +13,6 @@ import { BaseCore } from './base.js';
 import { FileHasher } from './fileHasher.js';
 
 export class PreCore extends BaseCore {
-	private os = getInput('os', { required: true, trimWhitespace: true }).toLowerCase() as 'linux' | 'windows' | 'macos';
-	private arch = getInput('arch', { required: true, trimWhitespace: true }).toLowerCase() as 'x86' | 'x64' | 'arm' | 'arm64';
-
 	private forceCheck = getBooleanInput('check-latest', { required: true, trimWhitespace: true });
 	private octokit = getOctokit(getInput('token', { required: true, trimWhitespace: true }));
 
