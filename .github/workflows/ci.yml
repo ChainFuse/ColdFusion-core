@@ -88,13 +88,13 @@ jobs:
           path: ${{ github.workspace }}/dist
       - run: Get-ChildItem -Path ${{ runner.tool_cache }} -Recurse | Format-Table FullName
         shell: pwsh
-      - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table FullName
+      - run: Get-ChildItem -Path ${{ runner.temp }} -Recurse | Format-Table FullName
         shell: pwsh
       - uses: ./
-      - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table FullName
+      - run: Get-ChildItem -Path ${{ runner.tool_cache }} -Recurse | Format-Table FullName
         if: always()
         shell: pwsh
-      - run: Get-ChildItem -Path ${{ runner.tool_cache }}/ColdFusion/models -Recurse | Format-Table FullName
+      - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table FullName
         if: always()
         shell: pwsh
   publish:
