@@ -18,9 +18,9 @@ export class MainCore extends BaseCore {
 		return cpus()[0]!.model.includes('Apple') && arch === 'arm64';
 	}
 
-	private static async pre() {
+	private async pre() {
 		if (platform() === 'darwin') {
-			if (!this.isMetalSupported) {
+			if (!MainCore.isMetalSupported) {
 				throw new Error('Metal is not supported on this system', { cause: cpus()[0]!.model });
 			}
 		}
@@ -29,7 +29,7 @@ export class MainCore extends BaseCore {
 	}
 
 	public async main() {
-		await MainCore.pre();
+		await this.pre();
 
 		// https://medium.com/@chhaybunsy/unleash-your-machine-learning-models-how-to-customize-ollamas-storage-directory-c9ea1ea2961a
 
