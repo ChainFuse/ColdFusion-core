@@ -55,6 +55,9 @@ export class PreCore extends BaseCore {
 
 	private installOllama() {
 		return this.ollamaVersion.then((release) => {
+			/**
+			 * @todo add multi platform support
+			 */
 			const executableAsset = release?.assets.find((asset) => asset.name.toLowerCase().includes('darwin') && !asset.name.toLowerCase().endsWith('.zip'));
 			const hashAsset = release?.assets.find((asset) => /^sha\d{3}sum/i.test(asset.name.toLowerCase()));
 			if (executableAsset && hashAsset) {
