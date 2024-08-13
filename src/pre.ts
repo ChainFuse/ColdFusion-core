@@ -75,6 +75,9 @@ export class PreCore extends BaseCore {
 							}
 						}),
 				]).then(([ollamaToolGuid, ollamaHashLine]) => {
+					console.info('ollamaToolGuid', ollamaToolGuid);
+					console.info('ollamaHashLine', ollamaHashLine);
+
 					const hashType = /^sha\d{3}/i.exec(hashAsset!.name.toLowerCase())![0];
 					const [expectedHash] = ollamaHashLine.split(' ');
 					return FileHasher.hashFile(ollamaToolGuid, hashType).then((computedHash) => {
