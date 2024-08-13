@@ -22,7 +22,7 @@ inputs:
     required: true
     default: llama3.1
   cache:
-    description: 'Set this option to true to enable caching.'
+    description: 'Set this option to true to enable caching of models.'
     default: true
   modelDir:
     description: Location to download model. Sub folders for each model will be automatically created
