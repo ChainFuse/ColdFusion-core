@@ -101,41 +101,41 @@ jobs:
       - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table FullName
         if: always()
         shell: pwsh
-  publish:
-    needs: ['test']
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
-        with:
-          disable-sudo: true
-          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - name: Delete old compiled action
-        run: rm -rv dist
-        shell: bash
-      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
-        with:
-          name: dist
-          path: ${{ github.workspace }}/dist
-      - name: Git Setup
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Check for Changes
-        id: changes
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "changes=false" >> $GITHUB_OUTPUT
-          fi
-      - run: git add dist/
-      - run: git commit -m "[ci skip] $PREVIOUS_GIT_MESSAGE"
-        if: steps.changes.outputs.changes == 'true'
-        shell: bash
-        env:
-          PREVIOUS_GIT_MESSAGE: ${{ github.event.head_commit.message }}
-      - run: git push
-        if: steps.changes.outputs.changes == 'true'
+  # publish:
+  #   needs: ['test']
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+  #       with:
+  #         disable-sudo: true
+  #         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+  #     - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+  #     - name: Delete old compiled action
+  #       run: rm -rv dist
+  #       shell: bash
+  #     - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+  #       with:
+  #         name: dist
+  #         path: ${{ github.workspace }}/dist
+  #     - name: Git Setup
+  #       run: |
+  #         git config user.name "github-actions[bot]"
+  #         git config user.email "github-actions[bot]@users.noreply.github.com"
+  #     - name: Check for Changes
+  #       id: changes
+  #       run: |
+  #         if [ -n "$(git status --porcelain)" ]; then
+  #           echo "changes=true" >> $GITHUB_OUTPUT
+  #         else
+  #           echo "changes=false" >> $GITHUB_OUTPUT
+  #         fi
+  #     - run: git add dist/
+  #     - run: git commit -m "[ci skip] $PREVIOUS_GIT_MESSAGE"
+  #       if: steps.changes.outputs.changes == 'true'
+  #       shell: bash
+  #       env:
+  #         PREVIOUS_GIT_MESSAGE: ${{ github.event.head_commit.message }}
+  #     - run: git push
+  #       if: steps.changes.outputs.changes == 'true'
