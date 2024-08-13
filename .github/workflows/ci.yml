@@ -86,7 +86,7 @@ jobs:
         with:
           name: dist
           path: ${{ github.workspace }}/dist
-      - run: echo toJSON(runner)
+      - run: echo ${{ toJSON(runner) }}
       - uses: ./
       - run: Get-ChildItem -Path ${{ runner.temp }}/ChainFuse -Recurse | Format-Table FullName
         if: always()
