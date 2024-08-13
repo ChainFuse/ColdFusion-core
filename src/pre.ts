@@ -6,7 +6,7 @@ import { cacheFile, downloadTool, evaluateVersions } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { constants, mkdir } from 'node:fs/promises';
-import { clean, coerce, satisfies } from 'semver';
+import { clean, coerce } from 'semver';
 import { BaseCore } from './base.js';
 import { FileHasher } from './fileHasher.js';
 
@@ -37,23 +37,15 @@ export class PreCore extends BaseCore {
 				per_page: 100,
 			})
 			.then(({ data }) => {
-				console.info(
-					'gh version check',
-					evaluateVersions(
-						data.map((release) => clean(release.tag_name)!),
-						this.requestedOllamaVersion,
-					),
+				const targetVersion = evaluateVersions(
+					data.map((release) => clean(release.tag_name)!),
+					this.requestedOllamaVersion,
 				);
 
 				return data.find((release) => {
-					const releaseVersion = clean(release.tag_name);
-					console.info('release', this.requestedOllamaVersion, releaseVersion, satisfies(this.requestedOllamaVersion, releaseVersion!));
+					console.info('release', this.requestedOllamaVersion, release.tag_name, clean(release.tag_name)! === targetVersion);
 
-					if (releaseVersion) {
-						return satisfies(this.requestedOllamaVersion, releaseVersion);
-					} else {
-						return false;
-					}
+					return clean(release.tag_name)! === targetVersion;
 				});
 			})
 			.catch((e) => {
