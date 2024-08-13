@@ -13,6 +13,7 @@ import { FileHasher } from './fileHasher.js';
 export class PreCore extends BaseCore {
 	private requestedOllamaVersion = getInput('ollama-version', { required: true, trimWhitespace: true });
 	private forceCheck = getBooleanInput('check-latest', { required: true, trimWhitespace: true });
+	private octokit = getOctokit(getInput('token', { required: true, trimWhitespace: true }));
 
 	constructor() {
 		super();
@@ -30,7 +31,32 @@ export class PreCore extends BaseCore {
 	}
 
 	private get ollamaVersion() {
-		return getOctokit(getInput('token', { required: true, trimWhitespace: true }))
+		// const allVersions: Awaited<ReturnType<ReturnType<typeof getOctokit>['rest']['repos']['listReleases']>>['data'] = [];
+
+		return this.octokit
+			.paginate(
+				'GET /repos/{owner}/{repo}/releases',
+				{
+					owner: 'ollama',
+					repo: 'ollama',
+					per_page: 100,
+				},
+				// ({ data }, done) => allVersions.push(...data),
+			)
+			.then((data) => {
+				console.debug('release count', data.length);
+
+				const targetVersion = evaluateVersions(
+					data.map((release) => clean(release.tag_name)!),
+					this.requestedOllamaVersion,
+				);
+
+				return data.find((release) => clean(release.tag_name)! === targetVersion);
+			})
+			.catch((e) => {
+				throw e;
+			});
+		/*return getOctokit(getInput('token', { required: true, trimWhitespace: true }))
 			.rest.repos.listReleases({
 				owner: 'ollama',
 				repo: 'ollama',
@@ -46,7 +72,7 @@ export class PreCore extends BaseCore {
 			})
 			.catch((e) => {
 				throw e;
-			});
+			});*/
 	}
 
 	private installOllama() {
