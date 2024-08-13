@@ -2,7 +2,7 @@ import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
 import { exportVariable, getBooleanInput, getInput, info, warning } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
-import { cacheFile, downloadTool } from '@actions/tool-cache';
+import { cacheFile, downloadTool, evaluateVersions } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { constants, mkdir } from 'node:fs/promises';
@@ -37,6 +37,14 @@ export class PreCore extends BaseCore {
 				per_page: 100,
 			})
 			.then(({ data }) => {
+				console.info(
+					'gh version check',
+					evaluateVersions(
+						data.map((release) => clean(release.tag_name)!),
+						this.requestedOllamaVersion,
+					),
+				);
+
 				return data.find((release) => {
 					const releaseVersion = clean(release.tag_name);
 					console.info('release', this.requestedOllamaVersion, releaseVersion, satisfies(this.requestedOllamaVersion, releaseVersion!));
