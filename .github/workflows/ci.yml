@@ -88,6 +88,7 @@ jobs:
           path: ${{ github.workspace }}/dist
       - run: ls -liA ${{ runner.tool_cache }}
       - run: ls -liA ${{ runner.temp }}
+      - run: whereis node
       - uses: ./
       - run: Get-ChildItem -Path ${{ runner.temp }}/ChainFuse -Recurse | Format-Table FullName
         if: always()
