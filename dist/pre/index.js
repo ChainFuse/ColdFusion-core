@@ -6306,7 +6306,7 @@ class ExecState extends events.EventEmitter {
 
 /***/ }),
 
-/***/ 87:
+/***/ 4087:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 
@@ -6367,7 +6367,7 @@ exports.Context = Context;
 
 /***/ }),
 
-/***/ 438:
+/***/ 5438:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -6396,8 +6396,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(87));
-const utils_1 = __nccwpck_require__(30);
+const Context = __importStar(__nccwpck_require__(4087));
+const utils_1 = __nccwpck_require__(3030);
 exports.context = new Context.Context();
 /**
  * Returns a hydrated octokit ready to use for GitHub Actions
@@ -6414,7 +6414,7 @@ exports.getOctokit = getOctokit;
 
 /***/ }),
 
-/***/ 914:
+/***/ 7914:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -6490,7 +6490,7 @@ exports.getApiBaseUrl = getApiBaseUrl;
 
 /***/ }),
 
-/***/ 30:
+/***/ 3030:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -6519,12 +6519,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.defaults = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(87));
-const Utils = __importStar(__nccwpck_require__(914));
+const Context = __importStar(__nccwpck_require__(4087));
+const Utils = __importStar(__nccwpck_require__(7914));
 // octokit + plugins
-const core_1 = __nccwpck_require__(762);
-const plugin_rest_endpoint_methods_1 = __nccwpck_require__(44);
-const plugin_paginate_rest_1 = __nccwpck_require__(193);
+const core_1 = __nccwpck_require__(6762);
+const plugin_rest_endpoint_methods_1 = __nccwpck_require__(3044);
+const plugin_paginate_rest_1 = __nccwpck_require__(4193);
 exports.context = new Context.Context();
 const baseUrl = Utils.getApiBaseUrl();
 exports.defaults = {
@@ -6552,6 +6552,1188 @@ function getOctokitOptions(token, options) {
 }
 exports.getOctokitOptions = getOctokitOptions;
 //# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 8090:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.hashFiles = exports.create = void 0;
+const internal_globber_1 = __nccwpck_require__(8298);
+const internal_hash_files_1 = __nccwpck_require__(2448);
+/**
+ * Constructs a globber
+ *
+ * @param patterns  Patterns separated by newlines
+ * @param options   Glob options
+ */
+function create(patterns, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield internal_globber_1.DefaultGlobber.create(patterns, options);
+    });
+}
+exports.create = create;
+/**
+ * Computes the sha256 hash of a glob
+ *
+ * @param patterns  Patterns separated by newlines
+ * @param currentWorkspace  Workspace used when matching files
+ * @param options   Glob options
+ * @param verbose   Enables verbose logging
+ */
+function hashFiles(patterns, currentWorkspace = '', options, verbose = false) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let followSymbolicLinks = true;
+        if (options && typeof options.followSymbolicLinks === 'boolean') {
+            followSymbolicLinks = options.followSymbolicLinks;
+        }
+        const globber = yield create(patterns, { followSymbolicLinks });
+        return internal_hash_files_1.hashFiles(globber, currentWorkspace, verbose);
+    });
+}
+exports.hashFiles = hashFiles;
+//# sourceMappingURL=glob.js.map
+
+/***/ }),
+
+/***/ 1026:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOptions = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+/**
+ * Returns a copy with defaults filled in.
+ */
+function getOptions(copy) {
+    const result = {
+        followSymbolicLinks: true,
+        implicitDescendants: true,
+        matchDirectories: true,
+        omitBrokenSymbolicLinks: true
+    };
+    if (copy) {
+        if (typeof copy.followSymbolicLinks === 'boolean') {
+            result.followSymbolicLinks = copy.followSymbolicLinks;
+            core.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+        }
+        if (typeof copy.implicitDescendants === 'boolean') {
+            result.implicitDescendants = copy.implicitDescendants;
+            core.debug(`implicitDescendants '${result.implicitDescendants}'`);
+        }
+        if (typeof copy.matchDirectories === 'boolean') {
+            result.matchDirectories = copy.matchDirectories;
+            core.debug(`matchDirectories '${result.matchDirectories}'`);
+        }
+        if (typeof copy.omitBrokenSymbolicLinks === 'boolean') {
+            result.omitBrokenSymbolicLinks = copy.omitBrokenSymbolicLinks;
+            core.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+        }
+    }
+    return result;
+}
+exports.getOptions = getOptions;
+//# sourceMappingURL=internal-glob-options-helper.js.map
+
+/***/ }),
+
+/***/ 8298:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
+var __await = (this && this.__await) || function (v) { return this instanceof __await ? (this.v = v, this) : new __await(v); }
+var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DefaultGlobber = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const fs = __importStar(__nccwpck_require__(7147));
+const globOptionsHelper = __importStar(__nccwpck_require__(1026));
+const path = __importStar(__nccwpck_require__(1017));
+const patternHelper = __importStar(__nccwpck_require__(9005));
+const internal_match_kind_1 = __nccwpck_require__(1063);
+const internal_pattern_1 = __nccwpck_require__(4536);
+const internal_search_state_1 = __nccwpck_require__(9117);
+const IS_WINDOWS = process.platform === 'win32';
+class DefaultGlobber {
+    constructor(options) {
+        this.patterns = [];
+        this.searchPaths = [];
+        this.options = globOptionsHelper.getOptions(options);
+    }
+    getSearchPaths() {
+        // Return a copy
+        return this.searchPaths.slice();
+    }
+    glob() {
+        var e_1, _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = [];
+            try {
+                for (var _b = __asyncValues(this.globGenerator()), _c; _c = yield _b.next(), !_c.done;) {
+                    const itemPath = _c.value;
+                    result.push(itemPath);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            return result;
+        });
+    }
+    globGenerator() {
+        return __asyncGenerator(this, arguments, function* globGenerator_1() {
+            // Fill in defaults options
+            const options = globOptionsHelper.getOptions(this.options);
+            // Implicit descendants?
+            const patterns = [];
+            for (const pattern of this.patterns) {
+                patterns.push(pattern);
+                if (options.implicitDescendants &&
+                    (pattern.trailingSeparator ||
+                        pattern.segments[pattern.segments.length - 1] !== '**')) {
+                    patterns.push(new internal_pattern_1.Pattern(pattern.negate, true, pattern.segments.concat('**')));
+                }
+            }
+            // Push the search paths
+            const stack = [];
+            for (const searchPath of patternHelper.getSearchPaths(patterns)) {
+                core.debug(`Search path '${searchPath}'`);
+                // Exists?
+                try {
+                    // Intentionally using lstat. Detection for broken symlink
+                    // will be performed later (if following symlinks).
+                    yield __await(fs.promises.lstat(searchPath));
+                }
+                catch (err) {
+                    if (err.code === 'ENOENT') {
+                        continue;
+                    }
+                    throw err;
+                }
+                stack.unshift(new internal_search_state_1.SearchState(searchPath, 1));
+            }
+            // Search
+            const traversalChain = []; // used to detect cycles
+            while (stack.length) {
+                // Pop
+                const item = stack.pop();
+                // Match?
+                const match = patternHelper.match(patterns, item.path);
+                const partialMatch = !!match || patternHelper.partialMatch(patterns, item.path);
+                if (!match && !partialMatch) {
+                    continue;
+                }
+                // Stat
+                const stats = yield __await(DefaultGlobber.stat(item, options, traversalChain)
+                // Broken symlink, or symlink cycle detected, or no longer exists
+                );
+                // Broken symlink, or symlink cycle detected, or no longer exists
+                if (!stats) {
+                    continue;
+                }
+                // Directory
+                if (stats.isDirectory()) {
+                    // Matched
+                    if (match & internal_match_kind_1.MatchKind.Directory && options.matchDirectories) {
+                        yield yield __await(item.path);
+                    }
+                    // Descend?
+                    else if (!partialMatch) {
+                        continue;
+                    }
+                    // Push the child items in reverse
+                    const childLevel = item.level + 1;
+                    const childItems = (yield __await(fs.promises.readdir(item.path))).map(x => new internal_search_state_1.SearchState(path.join(item.path, x), childLevel));
+                    stack.push(...childItems.reverse());
+                }
+                // File
+                else if (match & internal_match_kind_1.MatchKind.File) {
+                    yield yield __await(item.path);
+                }
+            }
+        });
+    }
+    /**
+     * Constructs a DefaultGlobber
+     */
+    static create(patterns, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = new DefaultGlobber(options);
+            if (IS_WINDOWS) {
+                patterns = patterns.replace(/\r\n/g, '\n');
+                patterns = patterns.replace(/\r/g, '\n');
+            }
+            const lines = patterns.split('\n').map(x => x.trim());
+            for (const line of lines) {
+                // Empty or comment
+                if (!line || line.startsWith('#')) {
+                    continue;
+                }
+                // Pattern
+                else {
+                    result.patterns.push(new internal_pattern_1.Pattern(line));
+                }
+            }
+            result.searchPaths.push(...patternHelper.getSearchPaths(result.patterns));
+            return result;
+        });
+    }
+    static stat(item, options, traversalChain) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Note:
+            // `stat` returns info about the target of a symlink (or symlink chain)
+            // `lstat` returns info about a symlink itself
+            let stats;
+            if (options.followSymbolicLinks) {
+                try {
+                    // Use `stat` (following symlinks)
+                    stats = yield fs.promises.stat(item.path);
+                }
+                catch (err) {
+                    if (err.code === 'ENOENT') {
+                        if (options.omitBrokenSymbolicLinks) {
+                            core.debug(`Broken symlink '${item.path}'`);
+                            return undefined;
+                        }
+                        throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
+                    }
+                    throw err;
+                }
+            }
+            else {
+                // Use `lstat` (not following symlinks)
+                stats = yield fs.promises.lstat(item.path);
+            }
+            // Note, isDirectory() returns false for the lstat of a symlink
+            if (stats.isDirectory() && options.followSymbolicLinks) {
+                // Get the realpath
+                const realPath = yield fs.promises.realpath(item.path);
+                // Fixup the traversal chain to match the item level
+                while (traversalChain.length >= item.level) {
+                    traversalChain.pop();
+                }
+                // Test for a cycle
+                if (traversalChain.some((x) => x === realPath)) {
+                    core.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+                    return undefined;
+                }
+                // Update the traversal chain
+                traversalChain.push(realPath);
+            }
+            return stats;
+        });
+    }
+}
+exports.DefaultGlobber = DefaultGlobber;
+//# sourceMappingURL=internal-globber.js.map
+
+/***/ }),
+
+/***/ 2448:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.hashFiles = void 0;
+const crypto = __importStar(__nccwpck_require__(6113));
+const core = __importStar(__nccwpck_require__(2186));
+const fs = __importStar(__nccwpck_require__(7147));
+const stream = __importStar(__nccwpck_require__(2781));
+const util = __importStar(__nccwpck_require__(3837));
+const path = __importStar(__nccwpck_require__(1017));
+function hashFiles(globber, currentWorkspace, verbose = false) {
+    var e_1, _a;
+    var _b;
+    return __awaiter(this, void 0, void 0, function* () {
+        const writeDelegate = verbose ? core.info : core.debug;
+        let hasMatch = false;
+        const githubWorkspace = currentWorkspace
+            ? currentWorkspace
+            : (_b = process.env['GITHUB_WORKSPACE']) !== null && _b !== void 0 ? _b : process.cwd();
+        const result = crypto.createHash('sha256');
+        let count = 0;
+        try {
+            for (var _c = __asyncValues(globber.globGenerator()), _d; _d = yield _c.next(), !_d.done;) {
+                const file = _d.value;
+                writeDelegate(file);
+                if (!file.startsWith(`${githubWorkspace}${path.sep}`)) {
+                    writeDelegate(`Ignore '${file}' since it is not under GITHUB_WORKSPACE.`);
+                    continue;
+                }
+                if (fs.statSync(file).isDirectory()) {
+                    writeDelegate(`Skip directory '${file}'.`);
+                    continue;
+                }
+                const hash = crypto.createHash('sha256');
+                const pipeline = util.promisify(stream.pipeline);
+                yield pipeline(fs.createReadStream(file), hash);
+                result.write(hash.digest());
+                count++;
+                if (!hasMatch) {
+                    hasMatch = true;
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_d && !_d.done && (_a = _c.return)) yield _a.call(_c);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        result.end();
+        if (hasMatch) {
+            writeDelegate(`Found ${count} files to hash.`);
+            return result.digest('hex');
+        }
+        else {
+            writeDelegate(`No matches found for glob`);
+            return '';
+        }
+    });
+}
+exports.hashFiles = hashFiles;
+//# sourceMappingURL=internal-hash-files.js.map
+
+/***/ }),
+
+/***/ 1063:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MatchKind = void 0;
+/**
+ * Indicates whether a pattern matches a path
+ */
+var MatchKind;
+(function (MatchKind) {
+    /** Not matched */
+    MatchKind[MatchKind["None"] = 0] = "None";
+    /** Matched if the path is a directory */
+    MatchKind[MatchKind["Directory"] = 1] = "Directory";
+    /** Matched if the path is a regular file */
+    MatchKind[MatchKind["File"] = 2] = "File";
+    /** Matched */
+    MatchKind[MatchKind["All"] = 3] = "All";
+})(MatchKind = exports.MatchKind || (exports.MatchKind = {}));
+//# sourceMappingURL=internal-match-kind.js.map
+
+/***/ }),
+
+/***/ 1849:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.safeTrimTrailingSeparator = exports.normalizeSeparators = exports.hasRoot = exports.hasAbsoluteRoot = exports.ensureAbsoluteRoot = exports.dirname = void 0;
+const path = __importStar(__nccwpck_require__(1017));
+const assert_1 = __importDefault(__nccwpck_require__(9491));
+const IS_WINDOWS = process.platform === 'win32';
+/**
+ * Similar to path.dirname except normalizes the path separators and slightly better handling for Windows UNC paths.
+ *
+ * For example, on Linux/macOS:
+ * - `/               => /`
+ * - `/hello          => /`
+ *
+ * For example, on Windows:
+ * - `C:\             => C:\`
+ * - `C:\hello        => C:\`
+ * - `C:              => C:`
+ * - `C:hello         => C:`
+ * - `\               => \`
+ * - `\hello          => \`
+ * - `\\hello         => \\hello`
+ * - `\\hello\world   => \\hello\world`
+ */
+function dirname(p) {
+    // Normalize slashes and trim unnecessary trailing slash
+    p = safeTrimTrailingSeparator(p);
+    // Windows UNC root, e.g. \\hello or \\hello\world
+    if (IS_WINDOWS && /^\\\\[^\\]+(\\[^\\]+)?$/.test(p)) {
+        return p;
+    }
+    // Get dirname
+    let result = path.dirname(p);
+    // Trim trailing slash for Windows UNC root, e.g. \\hello\world\
+    if (IS_WINDOWS && /^\\\\[^\\]+\\[^\\]+\\$/.test(result)) {
+        result = safeTrimTrailingSeparator(result);
+    }
+    return result;
+}
+exports.dirname = dirname;
+/**
+ * Roots the path if not already rooted. On Windows, relative roots like `\`
+ * or `C:` are expanded based on the current working directory.
+ */
+function ensureAbsoluteRoot(root, itemPath) {
+    assert_1.default(root, `ensureAbsoluteRoot parameter 'root' must not be empty`);
+    assert_1.default(itemPath, `ensureAbsoluteRoot parameter 'itemPath' must not be empty`);
+    // Already rooted
+    if (hasAbsoluteRoot(itemPath)) {
+        return itemPath;
+    }
+    // Windows
+    if (IS_WINDOWS) {
+        // Check for itemPath like C: or C:foo
+        if (itemPath.match(/^[A-Z]:[^\\/]|^[A-Z]:$/i)) {
+            let cwd = process.cwd();
+            assert_1.default(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
+            // Drive letter matches cwd? Expand to cwd
+            if (itemPath[0].toUpperCase() === cwd[0].toUpperCase()) {
+                // Drive only, e.g. C:
+                if (itemPath.length === 2) {
+                    // Preserve specified drive letter case (upper or lower)
+                    return `${itemPath[0]}:\\${cwd.substr(3)}`;
+                }
+                // Drive + path, e.g. C:foo
+                else {
+                    if (!cwd.endsWith('\\')) {
+                        cwd += '\\';
+                    }
+                    // Preserve specified drive letter case (upper or lower)
+                    return `${itemPath[0]}:\\${cwd.substr(3)}${itemPath.substr(2)}`;
+                }
+            }
+            // Different drive
+            else {
+                return `${itemPath[0]}:\\${itemPath.substr(2)}`;
+            }
+        }
+        // Check for itemPath like \ or \foo
+        else if (normalizeSeparators(itemPath).match(/^\\$|^\\[^\\]/)) {
+            const cwd = process.cwd();
+            assert_1.default(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
+            return `${cwd[0]}:\\${itemPath.substr(1)}`;
+        }
+    }
+    assert_1.default(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
+    // Otherwise ensure root ends with a separator
+    if (root.endsWith('/') || (IS_WINDOWS && root.endsWith('\\'))) {
+        // Intentionally empty
+    }
+    else {
+        // Append separator
+        root += path.sep;
+    }
+    return root + itemPath;
+}
+exports.ensureAbsoluteRoot = ensureAbsoluteRoot;
+/**
+ * On Linux/macOS, true if path starts with `/`. On Windows, true for paths like:
+ * `\\hello\share` and `C:\hello` (and using alternate separator).
+ */
+function hasAbsoluteRoot(itemPath) {
+    assert_1.default(itemPath, `hasAbsoluteRoot parameter 'itemPath' must not be empty`);
+    // Normalize separators
+    itemPath = normalizeSeparators(itemPath);
+    // Windows
+    if (IS_WINDOWS) {
+        // E.g. \\hello\share or C:\hello
+        return itemPath.startsWith('\\\\') || /^[A-Z]:\\/i.test(itemPath);
+    }
+    // E.g. /hello
+    return itemPath.startsWith('/');
+}
+exports.hasAbsoluteRoot = hasAbsoluteRoot;
+/**
+ * On Linux/macOS, true if path starts with `/`. On Windows, true for paths like:
+ * `\`, `\hello`, `\\hello\share`, `C:`, and `C:\hello` (and using alternate separator).
+ */
+function hasRoot(itemPath) {
+    assert_1.default(itemPath, `isRooted parameter 'itemPath' must not be empty`);
+    // Normalize separators
+    itemPath = normalizeSeparators(itemPath);
+    // Windows
+    if (IS_WINDOWS) {
+        // E.g. \ or \hello or \\hello
+        // E.g. C: or C:\hello
+        return itemPath.startsWith('\\') || /^[A-Z]:/i.test(itemPath);
+    }
+    // E.g. /hello
+    return itemPath.startsWith('/');
+}
+exports.hasRoot = hasRoot;
+/**
+ * Removes redundant slashes and converts `/` to `\` on Windows
+ */
+function normalizeSeparators(p) {
+    p = p || '';
+    // Windows
+    if (IS_WINDOWS) {
+        // Convert slashes on Windows
+        p = p.replace(/\//g, '\\');
+        // Remove redundant slashes
+        const isUnc = /^\\\\+[^\\]/.test(p); // e.g. \\hello
+        return (isUnc ? '\\' : '') + p.replace(/\\\\+/g, '\\'); // preserve leading \\ for UNC
+    }
+    // Remove redundant slashes
+    return p.replace(/\/\/+/g, '/');
+}
+exports.normalizeSeparators = normalizeSeparators;
+/**
+ * Normalizes the path separators and trims the trailing separator (when safe).
+ * For example, `/foo/ => /foo` but `/ => /`
+ */
+function safeTrimTrailingSeparator(p) {
+    // Short-circuit if empty
+    if (!p) {
+        return '';
+    }
+    // Normalize separators
+    p = normalizeSeparators(p);
+    // No trailing slash
+    if (!p.endsWith(path.sep)) {
+        return p;
+    }
+    // Check '/' on Linux/macOS and '\' on Windows
+    if (p === path.sep) {
+        return p;
+    }
+    // On Windows check if drive root. E.g. C:\
+    if (IS_WINDOWS && /^[A-Z]:\\$/i.test(p)) {
+        return p;
+    }
+    // Otherwise trim trailing slash
+    return p.substr(0, p.length - 1);
+}
+exports.safeTrimTrailingSeparator = safeTrimTrailingSeparator;
+//# sourceMappingURL=internal-path-helper.js.map
+
+/***/ }),
+
+/***/ 6836:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Path = void 0;
+const path = __importStar(__nccwpck_require__(1017));
+const pathHelper = __importStar(__nccwpck_require__(1849));
+const assert_1 = __importDefault(__nccwpck_require__(9491));
+const IS_WINDOWS = process.platform === 'win32';
+/**
+ * Helper class for parsing paths into segments
+ */
+class Path {
+    /**
+     * Constructs a Path
+     * @param itemPath Path or array of segments
+     */
+    constructor(itemPath) {
+        this.segments = [];
+        // String
+        if (typeof itemPath === 'string') {
+            assert_1.default(itemPath, `Parameter 'itemPath' must not be empty`);
+            // Normalize slashes and trim unnecessary trailing slash
+            itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
+            // Not rooted
+            if (!pathHelper.hasRoot(itemPath)) {
+                this.segments = itemPath.split(path.sep);
+            }
+            // Rooted
+            else {
+                // Add all segments, while not at the root
+                let remaining = itemPath;
+                let dir = pathHelper.dirname(remaining);
+                while (dir !== remaining) {
+                    // Add the segment
+                    const basename = path.basename(remaining);
+                    this.segments.unshift(basename);
+                    // Truncate the last segment
+                    remaining = dir;
+                    dir = pathHelper.dirname(remaining);
+                }
+                // Remainder is the root
+                this.segments.unshift(remaining);
+            }
+        }
+        // Array
+        else {
+            // Must not be empty
+            assert_1.default(itemPath.length > 0, `Parameter 'itemPath' must not be an empty array`);
+            // Each segment
+            for (let i = 0; i < itemPath.length; i++) {
+                let segment = itemPath[i];
+                // Must not be empty
+                assert_1.default(segment, `Parameter 'itemPath' must not contain any empty segments`);
+                // Normalize slashes
+                segment = pathHelper.normalizeSeparators(itemPath[i]);
+                // Root segment
+                if (i === 0 && pathHelper.hasRoot(segment)) {
+                    segment = pathHelper.safeTrimTrailingSeparator(segment);
+                    assert_1.default(segment === pathHelper.dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
+                    this.segments.push(segment);
+                }
+                // All other segments
+                else {
+                    // Must not contain slash
+                    assert_1.default(!segment.includes(path.sep), `Parameter 'itemPath' contains unexpected path separators`);
+                    this.segments.push(segment);
+                }
+            }
+        }
+    }
+    /**
+     * Converts the path to it's string representation
+     */
+    toString() {
+        // First segment
+        let result = this.segments[0];
+        // All others
+        let skipSlash = result.endsWith(path.sep) || (IS_WINDOWS && /^[A-Z]:$/i.test(result));
+        for (let i = 1; i < this.segments.length; i++) {
+            if (skipSlash) {
+                skipSlash = false;
+            }
+            else {
+                result += path.sep;
+            }
+            result += this.segments[i];
+        }
+        return result;
+    }
+}
+exports.Path = Path;
+//# sourceMappingURL=internal-path.js.map
+
+/***/ }),
+
+/***/ 9005:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.partialMatch = exports.match = exports.getSearchPaths = void 0;
+const pathHelper = __importStar(__nccwpck_require__(1849));
+const internal_match_kind_1 = __nccwpck_require__(1063);
+const IS_WINDOWS = process.platform === 'win32';
+/**
+ * Given an array of patterns, returns an array of paths to search.
+ * Duplicates and paths under other included paths are filtered out.
+ */
+function getSearchPaths(patterns) {
+    // Ignore negate patterns
+    patterns = patterns.filter(x => !x.negate);
+    // Create a map of all search paths
+    const searchPathMap = {};
+    for (const pattern of patterns) {
+        const key = IS_WINDOWS
+            ? pattern.searchPath.toUpperCase()
+            : pattern.searchPath;
+        searchPathMap[key] = 'candidate';
+    }
+    const result = [];
+    for (const pattern of patterns) {
+        // Check if already included
+        const key = IS_WINDOWS
+            ? pattern.searchPath.toUpperCase()
+            : pattern.searchPath;
+        if (searchPathMap[key] === 'included') {
+            continue;
+        }
+        // Check for an ancestor search path
+        let foundAncestor = false;
+        let tempKey = key;
+        let parent = pathHelper.dirname(tempKey);
+        while (parent !== tempKey) {
+            if (searchPathMap[parent]) {
+                foundAncestor = true;
+                break;
+            }
+            tempKey = parent;
+            parent = pathHelper.dirname(tempKey);
+        }
+        // Include the search pattern in the result
+        if (!foundAncestor) {
+            result.push(pattern.searchPath);
+            searchPathMap[key] = 'included';
+        }
+    }
+    return result;
+}
+exports.getSearchPaths = getSearchPaths;
+/**
+ * Matches the patterns against the path
+ */
+function match(patterns, itemPath) {
+    let result = internal_match_kind_1.MatchKind.None;
+    for (const pattern of patterns) {
+        if (pattern.negate) {
+            result &= ~pattern.match(itemPath);
+        }
+        else {
+            result |= pattern.match(itemPath);
+        }
+    }
+    return result;
+}
+exports.match = match;
+/**
+ * Checks whether to descend further into the directory
+ */
+function partialMatch(patterns, itemPath) {
+    return patterns.some(x => !x.negate && x.partialMatch(itemPath));
+}
+exports.partialMatch = partialMatch;
+//# sourceMappingURL=internal-pattern-helper.js.map
+
+/***/ }),
+
+/***/ 4536:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Pattern = void 0;
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
+const pathHelper = __importStar(__nccwpck_require__(1849));
+const assert_1 = __importDefault(__nccwpck_require__(9491));
+const minimatch_1 = __nccwpck_require__(3973);
+const internal_match_kind_1 = __nccwpck_require__(1063);
+const internal_path_1 = __nccwpck_require__(6836);
+const IS_WINDOWS = process.platform === 'win32';
+class Pattern {
+    constructor(patternOrNegate, isImplicitPattern = false, segments, homedir) {
+        /**
+         * Indicates whether matches should be excluded from the result set
+         */
+        this.negate = false;
+        // Pattern overload
+        let pattern;
+        if (typeof patternOrNegate === 'string') {
+            pattern = patternOrNegate.trim();
+        }
+        // Segments overload
+        else {
+            // Convert to pattern
+            segments = segments || [];
+            assert_1.default(segments.length, `Parameter 'segments' must not empty`);
+            const root = Pattern.getLiteral(segments[0]);
+            assert_1.default(root && pathHelper.hasAbsoluteRoot(root), `Parameter 'segments' first element must be a root path`);
+            pattern = new internal_path_1.Path(segments).toString().trim();
+            if (patternOrNegate) {
+                pattern = `!${pattern}`;
+            }
+        }
+        // Negate
+        while (pattern.startsWith('!')) {
+            this.negate = !this.negate;
+            pattern = pattern.substr(1).trim();
+        }
+        // Normalize slashes and ensures absolute root
+        pattern = Pattern.fixupPattern(pattern, homedir);
+        // Segments
+        this.segments = new internal_path_1.Path(pattern).segments;
+        // Trailing slash indicates the pattern should only match directories, not regular files
+        this.trailingSeparator = pathHelper
+            .normalizeSeparators(pattern)
+            .endsWith(path.sep);
+        pattern = pathHelper.safeTrimTrailingSeparator(pattern);
+        // Search path (literal path prior to the first glob segment)
+        let foundGlob = false;
+        const searchSegments = this.segments
+            .map(x => Pattern.getLiteral(x))
+            .filter(x => !foundGlob && !(foundGlob = x === ''));
+        this.searchPath = new internal_path_1.Path(searchSegments).toString();
+        // Root RegExp (required when determining partial match)
+        this.rootRegExp = new RegExp(Pattern.regExpEscape(searchSegments[0]), IS_WINDOWS ? 'i' : '');
+        this.isImplicitPattern = isImplicitPattern;
+        // Create minimatch
+        const minimatchOptions = {
+            dot: true,
+            nobrace: true,
+            nocase: IS_WINDOWS,
+            nocomment: true,
+            noext: true,
+            nonegate: true
+        };
+        pattern = IS_WINDOWS ? pattern.replace(/\\/g, '/') : pattern;
+        this.minimatch = new minimatch_1.Minimatch(pattern, minimatchOptions);
+    }
+    /**
+     * Matches the pattern against the specified path
+     */
+    match(itemPath) {
+        // Last segment is globstar?
+        if (this.segments[this.segments.length - 1] === '**') {
+            // Normalize slashes
+            itemPath = pathHelper.normalizeSeparators(itemPath);
+            // Append a trailing slash. Otherwise Minimatch will not match the directory immediately
+            // preceding the globstar. For example, given the pattern `/foo/**`, Minimatch returns
+            // false for `/foo` but returns true for `/foo/`. Append a trailing slash to handle that quirk.
+            if (!itemPath.endsWith(path.sep) && this.isImplicitPattern === false) {
+                // Note, this is safe because the constructor ensures the pattern has an absolute root.
+                // For example, formats like C: and C:foo on Windows are resolved to an absolute root.
+                itemPath = `${itemPath}${path.sep}`;
+            }
+        }
+        else {
+            // Normalize slashes and trim unnecessary trailing slash
+            itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
+        }
+        // Match
+        if (this.minimatch.match(itemPath)) {
+            return this.trailingSeparator ? internal_match_kind_1.MatchKind.Directory : internal_match_kind_1.MatchKind.All;
+        }
+        return internal_match_kind_1.MatchKind.None;
+    }
+    /**
+     * Indicates whether the pattern may match descendants of the specified path
+     */
+    partialMatch(itemPath) {
+        // Normalize slashes and trim unnecessary trailing slash
+        itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
+        // matchOne does not handle root path correctly
+        if (pathHelper.dirname(itemPath) === itemPath) {
+            return this.rootRegExp.test(itemPath);
+        }
+        return this.minimatch.matchOne(itemPath.split(IS_WINDOWS ? /\\+/ : /\/+/), this.minimatch.set[0], true);
+    }
+    /**
+     * Escapes glob patterns within a path
+     */
+    static globEscape(s) {
+        return (IS_WINDOWS ? s : s.replace(/\\/g, '\\\\')) // escape '\' on Linux/macOS
+            .replace(/(\[)(?=[^/]+\])/g, '[[]') // escape '[' when ']' follows within the path segment
+            .replace(/\?/g, '[?]') // escape '?'
+            .replace(/\*/g, '[*]'); // escape '*'
+    }
+    /**
+     * Normalizes slashes and ensures absolute root
+     */
+    static fixupPattern(pattern, homedir) {
+        // Empty
+        assert_1.default(pattern, 'pattern cannot be empty');
+        // Must not contain `.` segment, unless first segment
+        // Must not contain `..` segment
+        const literalSegments = new internal_path_1.Path(pattern).segments.map(x => Pattern.getLiteral(x));
+        assert_1.default(literalSegments.every((x, i) => (x !== '.' || i === 0) && x !== '..'), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
+        // Must not contain globs in root, e.g. Windows UNC path \\foo\b*r
+        assert_1.default(!pathHelper.hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
+        // Normalize slashes
+        pattern = pathHelper.normalizeSeparators(pattern);
+        // Replace leading `.` segment
+        if (pattern === '.' || pattern.startsWith(`.${path.sep}`)) {
+            pattern = Pattern.globEscape(process.cwd()) + pattern.substr(1);
+        }
+        // Replace leading `~` segment
+        else if (pattern === '~' || pattern.startsWith(`~${path.sep}`)) {
+            homedir = homedir || os.homedir();
+            assert_1.default(homedir, 'Unable to determine HOME directory');
+            assert_1.default(pathHelper.hasAbsoluteRoot(homedir), `Expected HOME directory to be a rooted path. Actual '${homedir}'`);
+            pattern = Pattern.globEscape(homedir) + pattern.substr(1);
+        }
+        // Replace relative drive root, e.g. pattern is C: or C:foo
+        else if (IS_WINDOWS &&
+            (pattern.match(/^[A-Z]:$/i) || pattern.match(/^[A-Z]:[^\\]/i))) {
+            let root = pathHelper.ensureAbsoluteRoot('C:\\dummy-root', pattern.substr(0, 2));
+            if (pattern.length > 2 && !root.endsWith('\\')) {
+                root += '\\';
+            }
+            pattern = Pattern.globEscape(root) + pattern.substr(2);
+        }
+        // Replace relative root, e.g. pattern is \ or \foo
+        else if (IS_WINDOWS && (pattern === '\\' || pattern.match(/^\\[^\\]/))) {
+            let root = pathHelper.ensureAbsoluteRoot('C:\\dummy-root', '\\');
+            if (!root.endsWith('\\')) {
+                root += '\\';
+            }
+            pattern = Pattern.globEscape(root) + pattern.substr(1);
+        }
+        // Otherwise ensure absolute root
+        else {
+            pattern = pathHelper.ensureAbsoluteRoot(Pattern.globEscape(process.cwd()), pattern);
+        }
+        return pathHelper.normalizeSeparators(pattern);
+    }
+    /**
+     * Attempts to unescape a pattern segment to create a literal path segment.
+     * Otherwise returns empty string.
+     */
+    static getLiteral(segment) {
+        let literal = '';
+        for (let i = 0; i < segment.length; i++) {
+            const c = segment[i];
+            // Escape
+            if (c === '\\' && !IS_WINDOWS && i + 1 < segment.length) {
+                literal += segment[++i];
+                continue;
+            }
+            // Wildcard
+            else if (c === '*' || c === '?') {
+                return '';
+            }
+            // Character set
+            else if (c === '[' && i + 1 < segment.length) {
+                let set = '';
+                let closed = -1;
+                for (let i2 = i + 1; i2 < segment.length; i2++) {
+                    const c2 = segment[i2];
+                    // Escape
+                    if (c2 === '\\' && !IS_WINDOWS && i2 + 1 < segment.length) {
+                        set += segment[++i2];
+                        continue;
+                    }
+                    // Closed
+                    else if (c2 === ']') {
+                        closed = i2;
+                        break;
+                    }
+                    // Otherwise
+                    else {
+                        set += c2;
+                    }
+                }
+                // Closed?
+                if (closed >= 0) {
+                    // Cannot convert
+                    if (set.length > 1) {
+                        return '';
+                    }
+                    // Convert to literal
+                    if (set) {
+                        literal += set;
+                        i = closed;
+                        continue;
+                    }
+                }
+                // Otherwise fall thru
+            }
+            // Append
+            literal += c;
+        }
+        return literal;
+    }
+    /**
+     * Escapes regexp special characters
+     * https://javascript.info/regexp-escaping
+     */
+    static regExpEscape(s) {
+        return s.replace(/[[\\^$.|?*+()]/g, '\\$&');
+    }
+}
+exports.Pattern = Pattern;
+//# sourceMappingURL=internal-pattern.js.map
+
+/***/ }),
+
+/***/ 9117:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SearchState = void 0;
+class SearchState {
+    constructor(path, level) {
+        this.path = path;
+        this.level = level;
+    }
+}
+exports.SearchState = SearchState;
+//# sourceMappingURL=internal-search-state.js.map
 
 /***/ }),
 
@@ -7886,7 +9068,7 @@ function copyFile(srcFile, destFile, force) {
 
 /***/ }),
 
-/***/ 473:
+/***/ 2473:
 /***/ (function(module, exports, __nccwpck_require__) {
 
 
@@ -8020,7 +9202,7 @@ exports._readLinuxVersionFile = _readLinuxVersionFile;
 
 /***/ }),
 
-/***/ 279:
+/***/ 8279:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -8109,7 +9291,7 @@ exports.RetryHelper = RetryHelper;
 
 /***/ }),
 
-/***/ 784:
+/***/ 7784:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -8149,7 +9331,7 @@ exports.evaluateVersions = exports.isExplicitVersion = exports.findFromManifest 
 const core = __importStar(__nccwpck_require__(2186));
 const io = __importStar(__nccwpck_require__(7436));
 const fs = __importStar(__nccwpck_require__(7147));
-const mm = __importStar(__nccwpck_require__(473));
+const mm = __importStar(__nccwpck_require__(2473));
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 const httpm = __importStar(__nccwpck_require__(6255));
@@ -8157,9 +9339,9 @@ const semver = __importStar(__nccwpck_require__(562));
 const stream = __importStar(__nccwpck_require__(2781));
 const util = __importStar(__nccwpck_require__(3837));
 const assert_1 = __nccwpck_require__(9491);
-const v4_1 = __importDefault(__nccwpck_require__(468));
+const v4_1 = __importDefault(__nccwpck_require__(7468));
 const exec_1 = __nccwpck_require__(1514);
-const retry_helper_1 = __nccwpck_require__(279);
+const retry_helper_1 = __nccwpck_require__(8279);
 class HTTPError extends Error {
     constructor(httpStatusCode) {
         super(`Unexpected HTTP response: ${httpStatusCode}`);
@@ -10430,7 +11612,7 @@ function coerce (version, options) {
 
 /***/ }),
 
-/***/ 701:
+/***/ 7701:
 /***/ ((module) => {
 
 /**
@@ -10463,7 +11645,7 @@ module.exports = bytesToUuid;
 
 /***/ }),
 
-/***/ 269:
+/***/ 7269:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 // Unique ID creation requires a high quality random # generator.  In node.js
@@ -10478,11 +11660,11 @@ module.exports = function nodeRNG() {
 
 /***/ }),
 
-/***/ 468:
+/***/ 7468:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var rng = __nccwpck_require__(269);
-var bytesToUuid = __nccwpck_require__(701);
+var rng = __nccwpck_require__(7269);
+var bytesToUuid = __nccwpck_require__(7701);
 
 function v4(options, buf, offset) {
   var i = buf && offset || 0;
@@ -44250,7 +45432,7 @@ var createTokenAuth = function createTokenAuth2(token) {
 
 /***/ }),
 
-/***/ 762:
+/***/ 6762:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -44278,10 +45460,10 @@ __export(dist_src_exports, {
   Octokit: () => Octokit
 });
 module.exports = __toCommonJS(dist_src_exports);
-var import_universal_user_agent = __nccwpck_require__(429);
-var import_before_after_hook = __nccwpck_require__(682);
-var import_request = __nccwpck_require__(234);
-var import_graphql = __nccwpck_require__(668);
+var import_universal_user_agent = __nccwpck_require__(5030);
+var import_before_after_hook = __nccwpck_require__(3682);
+var import_request = __nccwpck_require__(6234);
+var import_graphql = __nccwpck_require__(8467);
 var import_auth_token = __nccwpck_require__(334);
 
 // pkg/dist-src/version.js
@@ -44418,7 +45600,7 @@ var Octokit = class {
 
 /***/ }),
 
-/***/ 440:
+/***/ 9440:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -44448,7 +45630,7 @@ __export(dist_src_exports, {
 module.exports = __toCommonJS(dist_src_exports);
 
 // pkg/dist-src/defaults.js
-var import_universal_user_agent = __nccwpck_require__(429);
+var import_universal_user_agent = __nccwpck_require__(5030);
 
 // pkg/dist-src/version.js
 var VERSION = "9.0.5";
@@ -44801,7 +45983,7 @@ var endpoint = withDefaults(null, DEFAULTS);
 
 /***/ }),
 
-/***/ 668:
+/***/ 8467:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -44831,17 +46013,17 @@ __export(dist_src_exports, {
   withCustomRequest: () => withCustomRequest
 });
 module.exports = __toCommonJS(dist_src_exports);
-var import_request3 = __nccwpck_require__(234);
-var import_universal_user_agent = __nccwpck_require__(429);
+var import_request3 = __nccwpck_require__(6234);
+var import_universal_user_agent = __nccwpck_require__(5030);
 
 // pkg/dist-src/version.js
 var VERSION = "7.1.0";
 
 // pkg/dist-src/with-defaults.js
-var import_request2 = __nccwpck_require__(234);
+var import_request2 = __nccwpck_require__(6234);
 
 // pkg/dist-src/graphql.js
-var import_request = __nccwpck_require__(234);
+var import_request = __nccwpck_require__(6234);
 
 // pkg/dist-src/error.js
 function _buildMessageForResponseErrors(data) {
@@ -44958,7 +46140,7 @@ function withCustomRequest(customRequest) {
 
 /***/ }),
 
-/***/ 193:
+/***/ 4193:
 /***/ ((module) => {
 
 
@@ -45358,7 +46540,7 @@ paginateRest.VERSION = VERSION;
 
 /***/ }),
 
-/***/ 44:
+/***/ 3044:
 /***/ ((module) => {
 
 
@@ -47565,8 +48747,8 @@ __export(dist_src_exports, {
   RequestError: () => RequestError
 });
 module.exports = __toCommonJS(dist_src_exports);
-var import_deprecation = __nccwpck_require__(932);
-var import_once = __toESM(__nccwpck_require__(223));
+var import_deprecation = __nccwpck_require__(8932);
+var import_once = __toESM(__nccwpck_require__(1223));
 var logOnceCode = (0, import_once.default)((deprecation) => console.warn(deprecation));
 var logOnceHeaders = (0, import_once.default)((deprecation) => console.warn(deprecation));
 var RequestError = class extends Error {
@@ -47624,7 +48806,7 @@ var RequestError = class extends Error {
 
 /***/ }),
 
-/***/ 234:
+/***/ 6234:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -47652,8 +48834,8 @@ __export(dist_src_exports, {
   request: () => request
 });
 module.exports = __toCommonJS(dist_src_exports);
-var import_endpoint = __nccwpck_require__(440);
-var import_universal_user_agent = __nccwpck_require__(429);
+var import_endpoint = __nccwpck_require__(9440);
+var import_universal_user_agent = __nccwpck_require__(5030);
 
 // pkg/dist-src/version.js
 var VERSION = "8.4.0";
@@ -51025,12 +52207,12 @@ function range(a, b, str) {
 
 /***/ }),
 
-/***/ 682:
+/***/ 3682:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var register = __nccwpck_require__(670);
-var addHook = __nccwpck_require__(549);
-var removeHook = __nccwpck_require__(819);
+var register = __nccwpck_require__(4670);
+var addHook = __nccwpck_require__(5549);
+var removeHook = __nccwpck_require__(6819);
 
 // bind with array of arguments: https://stackoverflow.com/a/21792913
 var bind = Function.bind;
@@ -51093,7 +52275,7 @@ module.exports.Collection = Hook.Collection;
 
 /***/ }),
 
-/***/ 549:
+/***/ 5549:
 /***/ ((module) => {
 
 module.exports = addHook;
@@ -51146,7 +52328,7 @@ function addHook(state, kind, name, hook) {
 
 /***/ }),
 
-/***/ 670:
+/***/ 4670:
 /***/ ((module) => {
 
 module.exports = register;
@@ -51180,7 +52362,7 @@ function register(state, name, method, options) {
 
 /***/ }),
 
-/***/ 819:
+/***/ 6819:
 /***/ ((module) => {
 
 module.exports = removeHook;
@@ -51763,7 +52945,7 @@ DelayedStream.prototype._checkIfMaxDataSizeExceeded = function() {
 
 /***/ }),
 
-/***/ 932:
+/***/ 8932:
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -54752,10 +55934,10 @@ exports.AbortError = AbortError;
 
 /***/ }),
 
-/***/ 223:
+/***/ 1223:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var wrappy = __nccwpck_require__(940)
+var wrappy = __nccwpck_require__(2940)
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
 
@@ -81709,7 +82891,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 429:
+/***/ 5030:
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -84320,7 +85502,7 @@ module.exports.implForWrapper = function (wrapper) {
 
 /***/ }),
 
-/***/ 940:
+/***/ 2940:
 /***/ ((module) => {
 
 // Returns a wrapper function that returns a wrapped callback
@@ -89367,25 +90549,111 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 7816:
+/***/ 3048:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "A": () => (/* binding */ BaseCore)
+/* harmony export */ });
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _actions_tool_cache__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(7784);
+/* harmony import */ var _actions_tool_cache__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_tool_cache__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(9411);
+/* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(node_path__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+class BaseCore {
+    os = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('os', { required: true, trimWhitespace: true }).toLowerCase();
+    arch = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('arch', { required: true, trimWhitespace: true }).toLowerCase();
+    requestedOllamaVersion = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('ollama-version', { required: true, trimWhitespace: true });
+    model = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('model', { required: true, trimWhitespace: true });
+    modelDir = (0,node_path__WEBPACK_IMPORTED_MODULE_2__.format)((0,node_path__WEBPACK_IMPORTED_MODULE_2__.parse)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('modelDir', { required: true, trimWhitespace: true })));
+    get ollamaPath() {
+        return (0,node_path__WEBPACK_IMPORTED_MODULE_2__.join)((0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_1__.find)('ollama', this.requestedOllamaVersion), this.os === 'windows' ? 'ollama.exe' : 'ollama');
+    }
+}
+
+
+/***/ }),
+
+/***/ 7074:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
 // EXPORTS
 __nccwpck_require__.d(__webpack_exports__, {
-  "A": () => (/* binding */ BaseCore)
+  "Z": () => (/* binding */ FileHasher)
 });
 
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(2186);
-;// CONCATENATED MODULE: external "node:path"
-const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
-;// CONCATENATED MODULE: ./src/base.ts
+// EXTERNAL MODULE: ./node_modules/@actions/glob/lib/glob.js
+var lib_glob = __nccwpck_require__(8090);
+// EXTERNAL MODULE: external "node:crypto"
+var external_node_crypto_ = __nccwpck_require__(6005);
+;// CONCATENATED MODULE: external "node:fs"
+const external_node_fs_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs");
+;// CONCATENATED MODULE: ./src/fileHasher.ts
 
 
-class BaseCore {
-    model = (0,core.getInput)('model', { required: true, trimWhitespace: true });
-    modelDir = (0,external_node_path_namespaceObject.join)((0,external_node_path_namespaceObject.format)((0,external_node_path_namespaceObject.parse)((0,core.getInput)('modelDir', { required: true, trimWhitespace: true }))), 'ChainFuse', 'ColdFusion', 'models');
+
+
+class FileHasher {
+    static async isFile(path) {
+        return new Promise((resolve, reject) => {
+            (0,external_node_fs_namespaceObject.stat)(path, (err, stats) => {
+                if (err) {
+                    (0,core.error)(`Error checking path (${path}): ${err}`);
+                    resolve(false);
+                    reject(err);
+                }
+                else {
+                    resolve(stats.isFile());
+                }
+            });
+        });
+    }
+    static hashFiles(incomingGlob) {
+        let glob;
+        if (typeof incomingGlob === 'string') {
+            glob = (0,lib_glob.create)(incomingGlob);
+        }
+        else {
+            glob = incomingGlob;
+        }
+        return new Promise((resolve, reject) => {
+            glob.then((globber) => {
+                globber
+                    .glob()
+                    .then((paths) => {
+                    Promise.all(paths.map(async (path) => {
+                        if (await this.isFile(path)) {
+                            return this.hashFile(path);
+                        }
+                        return '';
+                    }))
+                        .then((fileHashes) => resolve(this.hashString(fileHashes.filter((hash) => hash !== '').join(''))))
+                        .catch(reject);
+                })
+                    .catch(reject);
+            }).catch(reject);
+        });
+    }
+    static async hashFile(path, hashType = 'sha256') {
+        return new Promise((resolve, reject) => {
+            const hash = (0,external_node_crypto_.createHash)(hashType);
+            const fileStream = (0,external_node_fs_namespaceObject.createReadStream)(path);
+            fileStream.on('error', reject);
+            hash.on('error', reject);
+            hash.on('finish', () => resolve(hash.digest('hex')));
+            fileStream.pipe(hash);
+        });
+    }
+    static hashString(data, hashType = 'sha256') {
+        return (0,external_node_crypto_.createHash)(hashType).update(data).digest('hex');
+    }
 }
 
 
@@ -89404,21 +90672,26 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _actions_exec__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(1514);
 /* harmony import */ var _actions_exec__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(_actions_exec__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(438);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(5438);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _actions_tool_cache__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(784);
-/* harmony import */ var _actions_tool_cache__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(_actions_tool_cache__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var node_buffer__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(254);
-/* harmony import */ var node_buffer__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__nccwpck_require__.n(node_buffer__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var node_crypto__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(5);
-/* harmony import */ var node_crypto__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__nccwpck_require__.n(node_crypto__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var node_fs__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(561);
-/* harmony import */ var node_fs__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__nccwpck_require__.n(node_fs__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var _actions_io__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(7436);
+/* harmony import */ var _actions_io__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(_actions_io__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(7784);
+/* harmony import */ var _actions_tool_cache__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__nccwpck_require__.n(_actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var node_buffer__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(2254);
+/* harmony import */ var node_buffer__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__nccwpck_require__.n(node_buffer__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var node_crypto__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(6005);
+/* harmony import */ var node_crypto__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__nccwpck_require__.n(node_crypto__WEBPACK_IMPORTED_MODULE_7__);
 /* harmony import */ var node_fs_promises__WEBPACK_IMPORTED_MODULE_8__ = __nccwpck_require__(3977);
 /* harmony import */ var node_fs_promises__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__nccwpck_require__.n(node_fs_promises__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var semver__WEBPACK_IMPORTED_MODULE_9__ = __nccwpck_require__(1383);
-/* harmony import */ var semver__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__nccwpck_require__.n(semver__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var _base_js__WEBPACK_IMPORTED_MODULE_10__ = __nccwpck_require__(7816);
+/* harmony import */ var node_os__WEBPACK_IMPORTED_MODULE_9__ = __nccwpck_require__(612);
+/* harmony import */ var node_os__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__nccwpck_require__.n(node_os__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_10__ = __nccwpck_require__(9411);
+/* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__nccwpck_require__.n(node_path__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var semver__WEBPACK_IMPORTED_MODULE_11__ = __nccwpck_require__(1383);
+/* harmony import */ var semver__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__nccwpck_require__.n(semver__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var _base_js__WEBPACK_IMPORTED_MODULE_12__ = __nccwpck_require__(3048);
+/* harmony import */ var _fileHasher_js__WEBPACK_IMPORTED_MODULE_13__ = __nccwpck_require__(7074);
 
 
 
@@ -89430,99 +90703,139 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 
 
 
-class PreCore extends _base_js__WEBPACK_IMPORTED_MODULE_10__/* .BaseCore */ .A {
-    requested;
+
+
+
+class PreCore extends _base_js__WEBPACK_IMPORTED_MODULE_12__/* .BaseCore */ .A {
+    forceCheck = (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput)('check-latest', { required: true, trimWhitespace: true });
+    octokit = (0,_actions_github__WEBPACK_IMPORTED_MODULE_3__.getOctokit)((0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)('token', { required: true, trimWhitespace: true }));
     constructor() {
         super();
-        const rawRequested = (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)('ollama-version', { required: true, trimWhitespace: true });
-        if (rawRequested.trim().toLowerCase() === 'latest') {
-            this.requested = null;
-        }
-        else {
-            this.requested = (0,semver__WEBPACK_IMPORTED_MODULE_9__.coerce)(rawRequested);
-            if (this.requested === null) {
-                throw new Error('Invalid version requested');
-            }
-        }
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.exportVariable)('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
     }
-    static get ollamaInstalled() {
-        return (0,_actions_exec__WEBPACK_IMPORTED_MODULE_2__.exec)('ollama', undefined, { silent: true })
-            .then((exitCode) => {
-            console.debug('ollama exit code', exitCode);
-            return true;
-        })
-            .catch();
-    }
-    get ollamaVersion() {
-        if (this.requested) {
-            return (0,_actions_github__WEBPACK_IMPORTED_MODULE_3__.getOctokit)((0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)('token', { required: true, trimWhitespace: true }))
-                .rest.repos.listReleases({
-                owner: 'ollama',
-                repo: 'ollama',
-                per_page: 100,
-            })
-                .then(({ data: releases }) => {
-                return releases.find((release) => {
-                    const temp = (0,semver__WEBPACK_IMPORTED_MODULE_9__.clean)(release.tag_name);
-                    if (temp) {
-                        return (0,semver__WEBPACK_IMPORTED_MODULE_9__.satisfies)(this.requested, temp);
-                    }
-                    else {
-                        return false;
-                    }
-                });
-            })
-                .catch((e) => {
-                throw e;
-            });
-        }
-        else {
-            return (0,_actions_github__WEBPACK_IMPORTED_MODULE_3__.getOctokit)((0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)('token', { required: true, trimWhitespace: true }))
-                .rest.repos.getLatestRelease({
-                owner: 'ollama',
-                repo: 'ollama',
-            })
-                .then(({ data }) => data)
-                .catch((e) => {
-                throw e;
-            });
-        }
-    }
-    calculateFileHash(filePath, hashType) {
-        return new Promise((resolve, reject) => {
-            const hash = (0,node_crypto__WEBPACK_IMPORTED_MODULE_6__.createHash)(hashType);
-            const stream = (0,node_fs__WEBPACK_IMPORTED_MODULE_7__.createReadStream)(filePath);
-            stream.on('error', (err) => reject(`Error reading the file: ${err.message}`));
-            stream.on('data', (chunk) => hash.update(chunk));
-            stream.on('end', () => resolve(hash.digest('hex')));
+    get ollamaInstalled() {
+        return (0,_actions_exec__WEBPACK_IMPORTED_MODULE_2__.exec)(this.ollamaPath, undefined, { silent: true })
+            .then(() => true)
+            .catch((e) => {
+            (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.error)(`find ${e}`);
+            throw e;
         });
     }
+    get ollamaVersionHttp() {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)('Getting Ollama versions from github releases');
+        return this.octokit
+            .paginate('GET /repos/{owner}/{repo}/releases', {
+            owner: 'ollama',
+            repo: 'ollama',
+            per_page: 100,
+        })
+            .then((data) => {
+            const targetVersion = (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__.evaluateVersions)(data.map((release) => (0,semver__WEBPACK_IMPORTED_MODULE_11__.clean)(release.tag_name)), this.requestedOllamaVersion);
+            (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`User requested ${this.requestedOllamaVersion}; Matched version ${targetVersion}`);
+            return data.find((release) => (0,semver__WEBPACK_IMPORTED_MODULE_11__.clean)(release.tag_name) === targetVersion);
+        })
+            .catch((e) => {
+            throw e;
+        });
+    }
+    static modeToString(mode) {
+        const permissions = [mode & node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IRUSR ? 'r' : '-', mode & node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IWUSR ? 'w' : '-', mode & node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXUSR ? 'x' : '-', mode & node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IRGRP ? 'r' : '-', mode & node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IWGRP ? 'w' : '-', mode & node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXGRP ? 'x' : '-', mode & node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IROTH ? 'r' : '-', mode & node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IWOTH ? 'w' : '-', mode & node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXOTH ? 'x' : '-'];
+        return permissions.join('');
+    }
     installOllama() {
-        return this.ollamaVersion.then((release) => {
-            const executableAsset = release?.assets.find((asset) => asset.name.toLowerCase().includes('darwin') && !asset.name.toLowerCase().endsWith('.zip'));
+        return this.ollamaVersionHttp.then((release) => {
+            const executableAsset = release?.assets.find((asset) => {
+                switch (this.os) {
+                    case 'macos':
+                        return asset.name.toLowerCase().includes('darwin') && !asset.name.toLowerCase().endsWith('.zip');
+                    case 'linux':
+                        switch (this.arch) {
+                            case 'x64':
+                                return asset.name.toLowerCase().includes(this.os) && asset.name.toLowerCase().endsWith('amd64');
+                            case 'arm64':
+                                return asset.name.toLowerCase().includes(this.os) && asset.name.toLowerCase().endsWith(this.arch);
+                            default:
+                                return false;
+                        }
+                    case 'windows':
+                        switch (this.arch) {
+                            case 'x64':
+                                return asset.name.toLowerCase().includes(this.os) && asset.name.toLowerCase().endsWith('amd64.zip');
+                            default:
+                                return false;
+                        }
+                }
+            });
             const hashAsset = release?.assets.find((asset) => /^sha\d{3}sum/i.test(asset.name.toLowerCase()));
             if (executableAsset && hashAsset) {
+                const isArchive = ['.zip', '.7z', '.pkg', '.tar.gz', '.tgz'].some((extension) => executableAsset.name.toLowerCase().endsWith(extension));
+                (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Downloading ${executableAsset.name} to ${(0,node_os__WEBPACK_IMPORTED_MODULE_9__.tmpdir)()}`);
                 return Promise.all([
-                    (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_4__.downloadTool)(executableAsset.browser_download_url, '/usr/local/bin/ollama'),
+                    (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__.downloadTool)(executableAsset.browser_download_url, (0,node_path__WEBPACK_IMPORTED_MODULE_10__.join)((0,node_os__WEBPACK_IMPORTED_MODULE_9__.tmpdir)(), executableAsset.name)),
                     fetch(new URL(hashAsset.browser_download_url))
                         .then((response) => response.text())
                         .then((hashFile) => {
                         const lines = hashFile.split('\n');
-                        const line = lines.find((line) => line.endsWith(executableAsset.name));
-                        if (line) {
-                            return line;
+                        const [expectedHash] = lines.find((line) => line.endsWith(executableAsset.name))?.split(' ') ?? [];
+                        if (expectedHash) {
+                            return expectedHash;
                         }
                         else {
                             throw new Error('file not in hashes', { cause: lines });
                         }
                     }),
-                ]).then(([ollamaToolGuid, ollamaHashLine]) => {
+                ]).then(([ollamaPath, expectedHash]) => {
+                    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Downloaded ${ollamaPath}`);
                     const hashType = /^sha\d{3}/i.exec(hashAsset.name.toLowerCase())[0];
-                    const [expectedHash] = ollamaHashLine.split(' ');
-                    return this.calculateFileHash(ollamaToolGuid, hashType).then((computedHash) => {
-                        if ((0,node_crypto__WEBPACK_IMPORTED_MODULE_6__.timingSafeEqual)(node_buffer__WEBPACK_IMPORTED_MODULE_5__.Buffer.from(computedHash, 'hex'), node_buffer__WEBPACK_IMPORTED_MODULE_5__.Buffer.from(expectedHash, 'hex'))) {
-                            return (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_4__.cacheFile)(ollamaToolGuid, '/usr/local/bin/ollama', 'ollama', (0,semver__WEBPACK_IMPORTED_MODULE_9__.coerce)(release.tag_name).toString());
+                    return _fileHasher_js__WEBPACK_IMPORTED_MODULE_13__/* .FileHasher.hashFile */ .Z.hashFile(ollamaPath, hashType).then(async (computedHash) => {
+                        if ((0,node_crypto__WEBPACK_IMPORTED_MODULE_7__.timingSafeEqual)(node_buffer__WEBPACK_IMPORTED_MODULE_6__.Buffer.from(computedHash, 'hex'), node_buffer__WEBPACK_IMPORTED_MODULE_6__.Buffer.from(expectedHash, 'hex'))) {
+                            (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`${isArchive ? 'archive' : 'executable'} ${executableAsset.name} verified against hash`);
+                            if (isArchive) {
+                                (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)('Extracting archive in place');
+                                if (ollamaPath.endsWith('.zip')) {
+                                    ollamaPath = await (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__.extractZip)(ollamaPath);
+                                }
+                                else if (ollamaPath.endsWith('.7z')) {
+                                    ollamaPath = await (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__.extract7z)(ollamaPath);
+                                }
+                                else if (ollamaPath.endsWith('.pkg')) {
+                                    ollamaPath = await (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__.extractXar)(ollamaPath);
+                                }
+                                else if (['.tar.gz', '.tgz'].some((extension) => executableAsset.name.toLowerCase().endsWith(extension))) {
+                                    ollamaPath = await (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__.extractTar)(ollamaPath);
+                                }
+                                (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Extracted ${ollamaPath}`);
+                                (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)('Adding execute bit to executable');
+                                return (0,node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.stat)((0,node_path__WEBPACK_IMPORTED_MODULE_10__.join)(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'))
+                                    .then(({ mode }) => {
+                                    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`${PreCore.modeToString(mode)} ${(0,node_path__WEBPACK_IMPORTED_MODULE_10__.join)(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`);
+                                    return (0,node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.chmod)((0,node_path__WEBPACK_IMPORTED_MODULE_10__.join)(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'), mode | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXUSR).then(() => (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`${PreCore.modeToString(mode | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXUSR)} ${(0,node_path__WEBPACK_IMPORTED_MODULE_10__.join)(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`));
+                                })
+                                    .then(() => {
+                                    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)("Caching tool archive in github's tool cache");
+                                    return (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__.cacheDir)(ollamaPath, 'ollama', (0,semver__WEBPACK_IMPORTED_MODULE_11__.coerce)(release.tag_name).toString()).then((cachedPath) => {
+                                        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Cached tool archive ${cachedPath}`);
+                                        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.addPath)(cachedPath);
+                                        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Added to path ${cachedPath}`);
+                                    });
+                                });
+                            }
+                            else {
+                                (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)('Adding execute bit to executable');
+                                return (0,node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.stat)(ollamaPath)
+                                    .then(({ mode }) => {
+                                    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`${PreCore.modeToString(mode)} ${ollamaPath}`);
+                                    return (0,node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.chmod)(ollamaPath, mode | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXUSR).then(() => (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`${PreCore.modeToString(mode | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXUSR)} ${ollamaPath}`));
+                                })
+                                    .then(() => {
+                                    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)("Caching tool in github's tool cache");
+                                    return (0,_actions_tool_cache__WEBPACK_IMPORTED_MODULE_5__.cacheFile)(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', (0,semver__WEBPACK_IMPORTED_MODULE_11__.coerce)(release.tag_name).toString()).then((cachedPath) => {
+                                        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Cached tool ${cachedPath}`);
+                                        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.addPath)(cachedPath);
+                                        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Added to path ${cachedPath}`);
+                                    });
+                                });
+                            }
                         }
                         else {
                             throw new Error('Hash mismatch', { cause: JSON.stringify({ expected: expectedHash, computed: computedHash }) });
@@ -89536,27 +90849,30 @@ class PreCore extends _base_js__WEBPACK_IMPORTED_MODULE_10__/* .BaseCore */ .A {
         });
     }
     async main() {
-        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Creating folder and parent(s): ${this.modelDir}`);
-        return PreCore.ollamaInstalled
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.startGroup)('Ollama installation');
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Checking if ollama is installed`);
+        return this.ollamaInstalled
             .then(() => {
-            if ((0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput)('check-latest', { trimWhitespace: true })) {
+            if (this.forceCheck) {
             }
         })
             .catch(() => {
+            (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)('Ollama not installed');
             return this.installOllama();
         })
-            .finally(() => (0,node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.mkdir)(this.modelDir, {
-            recursive: true,
-            mode: node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IRUSR | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IWUSR | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXUSR | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IRGRP | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXGRP | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IROTH | node_fs_promises__WEBPACK_IMPORTED_MODULE_8__.constants.S_IXOTH,
-        })
-            .then(() => {
-            if ((0,_actions_cache__WEBPACK_IMPORTED_MODULE_0__.isFeatureAvailable)()) {
-            }
-            else {
-                (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.warning)('Cache service not available. Falling back to download');
-            }
-        })
-            .catch());
+            .finally(async () => {
+            (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Verifying ollama is usable ${await this.ollamaInstalled}`);
+            (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.endGroup)();
+            (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Creating folder and parent(s): ${this.modelDir}`);
+            return (0,_actions_io__WEBPACK_IMPORTED_MODULE_4__.mkdirP)(this.modelDir).then(() => {
+                if ((0,_actions_cache__WEBPACK_IMPORTED_MODULE_0__.isFeatureAvailable)()) {
+                    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Created folder and parent(s): ${this.modelDir}`);
+                }
+                else {
+                    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.warning)('Cache service not available. Falling back to download');
+                }
+            });
+        });
     }
 }
 await new PreCore().main();
@@ -89665,14 +90981,14 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("net");
 
 /***/ }),
 
-/***/ 254:
+/***/ 2254:
 /***/ ((module) => {
 
 module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:buffer");
 
 /***/ }),
 
-/***/ 5:
+/***/ 6005:
 /***/ ((module) => {
 
 module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:crypto");
@@ -89686,17 +91002,24 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:events"
 
 /***/ }),
 
-/***/ 561:
-/***/ ((module) => {
-
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs");
-
-/***/ }),
-
 /***/ 3977:
 /***/ ((module) => {
 
 module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:fs/promises");
+
+/***/ }),
+
+/***/ 612:
+/***/ ((module) => {
+
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:os");
+
+/***/ }),
+
+/***/ 9411:
+/***/ ((module) => {
+
+module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
 
 /***/ }),
 
