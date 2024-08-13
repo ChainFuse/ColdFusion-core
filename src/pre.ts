@@ -146,7 +146,7 @@ export class PreCore extends BaseCore {
 								stat(ollamaPath)
 									.then(({ mode }) => {
 										info(`${mode} ${ollamaPath}`);
-										return chmod(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'), mode | constants.S_IXUSR).then(() => info(`${mode | constants.S_IXUSR} ${ollamaPath}`));
+										return chmod(ollamaPath, mode | constants.S_IXUSR).then(() => info(`${mode | constants.S_IXUSR} ${ollamaPath}`));
 									})
 									.then(() => {
 										info("Caching tool in github's tool cache");
