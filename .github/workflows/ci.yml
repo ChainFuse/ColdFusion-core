@@ -102,6 +102,8 @@ jobs:
         if: always() && runner.os == 'macOS'
       - run: launchctl list
         if: always() && runner.os == 'macOS'
+      - run: launchctl load -w /Library/LaunchDaemons/com.ollama.ollama.plist
+        if: always() && runner.os == 'macOS'
       - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table FullName
         if: always()
         shell: pwsh
