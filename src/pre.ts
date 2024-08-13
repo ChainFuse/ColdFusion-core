@@ -12,6 +12,7 @@ import { FileHasher } from './fileHasher.js';
 
 export class PreCore extends BaseCore {
 	private requested: ReturnType<typeof coerce>;
+	private forceCheck = getBooleanInput('check-latest', { required: true, trimWhitespace: true });
 
 	constructor() {
 		super();
