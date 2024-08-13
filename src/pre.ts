@@ -189,19 +189,22 @@ export class PreCore extends BaseCore {
 				info('Ollama not installed');
 				return this.installOllama();
 			})
-			.finally(async () => {
-				info(`Verifying ollama is usable ${await this.ollamaInstalled}`);
-				endGroup();
-				startGroup('Model installation');
-				info(`Creating folder and parent(s): ${this.modelDir}`);
-				return mkdirP(this.modelDir).then(() => {
-					if (isGhCacheAvailable()) {
-						info(`Created folder and parent(s): ${this.modelDir}`);
-					} else {
-						warning('Cache service not available. Falling back to download');
-					}
-				});
-			});
+			.finally(() =>
+				this.ollamaInstalled.then((ollamaAvailable) => {
+					info(`Verifying ollama is usable ${ollamaAvailable}`);
+					endGroup();
+
+					startGroup('Model installation');
+					info(`Creating folder and parent(s): ${this.modelDir}`);
+					return mkdirP(this.modelDir).then(() => {
+						if (isGhCacheAvailable()) {
+							info(`Created folder and parent(s): ${this.modelDir}`);
+						} else {
+							warning('Cache service not available. Falling back to download');
+						}
+					});
+				}),
+			);
 	}
 }
 
