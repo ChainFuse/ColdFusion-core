@@ -28,9 +28,13 @@ updates:
         versions:
           - '>=21.0.0'
     groups:
+      github-helpers:
+        patterns:
+          - '@actions/*'
       typescript-core:
         patterns:
           - 'typescript'
+          - '@vercel/ncc'
       typescript-types:
         patterns:
           - '@types/*'
