@@ -6,6 +6,7 @@ import { mkdirP } from '@actions/io';
 import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip, find } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
+import { chmod, constants, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { clean, coerce } from 'semver';
@@ -126,19 +127,35 @@ export class PreCore extends BaseCore {
 
 								info(`Extracted ${ollamaPath}`);
 
-								info("Caching tool archive in github's tool cache");
-								return cacheDir(ollamaPath, 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
-									info(`Cached tool archive ${cachedPath}`);
-									addPath(cachedPath);
-									info(`Added to path ${cachedPath}`);
-								});
+								info('Adding execute bit to executable');
+								return stat(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'))
+									.then(({ mode }) => {
+										info(`${mode} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`);
+										return chmod(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'), mode | constants.S_IXUSR).then(() => info(`${mode | constants.S_IXUSR} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`));
+									})
+									.then(() => {
+										info("Caching tool archive in github's tool cache");
+										return cacheDir(ollamaPath, 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
+											info(`Cached tool archive ${cachedPath}`);
+											addPath(cachedPath);
+											info(`Added to path ${cachedPath}`);
+										});
+									});
 							} else {
-								info("Caching tool in github's tool cache");
-								return cacheFile(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
-									info(`Cached tool ${cachedPath}`);
-									addPath(cachedPath);
-									info(`Added to path ${cachedPath}`);
-								});
+								info('Adding execute bit to executable');
+								stat(ollamaPath)
+									.then(({ mode }) => {
+										info(`${mode} ${ollamaPath}`);
+										return chmod(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'), mode | constants.S_IXUSR).then(() => info(`${mode | constants.S_IXUSR} ${ollamaPath}`));
+									})
+									.then(() => {
+										info("Caching tool in github's tool cache");
+										return cacheFile(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
+											info(`Cached tool ${cachedPath}`);
+											addPath(cachedPath);
+											info(`Added to path ${cachedPath}`);
+										});
+									});
 							}
 						} else {
 							throw new Error('Hash mismatch', { cause: JSON.stringify({ expected: expectedHash, computed: computedHash }) });
