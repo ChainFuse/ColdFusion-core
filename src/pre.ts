@@ -2,7 +2,6 @@ import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
 import { addPath, endGroup, error, exportVariable, getBooleanInput, getInput, info, startGroup, warning } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
-import { which } from '@actions/io';
 import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
@@ -17,7 +16,6 @@ export class PreCore extends BaseCore {
 	private os = getInput('os', { required: true, trimWhitespace: true }).toLowerCase() as 'linux' | 'windows' | 'macos';
 	private arch = getInput('arch', { required: true, trimWhitespace: true }).toLowerCase() as 'x86' | 'x64' | 'arm' | 'arm64';
 
-	private requestedOllamaVersion = getInput('ollama-version', { required: true, trimWhitespace: true });
 	private forceCheck = getBooleanInput('check-latest', { required: true, trimWhitespace: true });
 	private octokit = getOctokit(getInput('token', { required: true, trimWhitespace: true }));
 
@@ -27,20 +25,12 @@ export class PreCore extends BaseCore {
 		exportVariable('COLDFUSION_CORE_PRE_EXECUTED', `${true}`);
 	}
 
-	private static get ollamaInstalled() {
-		return which('ollama', true)
-			.then((path) => {
-				console.info('find', path);
-
-				return exec(path, undefined, { silent: true })
-					.then((exitCode) => {
-						console.debug('ollama exit code', exitCode);
-						return true;
-					})
-					.catch((e) => {
-						error(`find ${e}`);
-						throw e;
-					});
+	private get ollamaInstalled() {
+		console.info('find', join(...this.ollamaPath.slice(0, -2)));
+		return exec(join(...this.ollamaPath.slice(0, -2)), undefined, { silent: true })
+			.then((exitCode) => {
+				console.debug('ollama exit code', exitCode);
+				return true;
 			})
 			.catch((e) => {
 				error(`find ${e}`);
@@ -172,7 +162,7 @@ export class PreCore extends BaseCore {
 		 */
 		startGroup('Ollama installation');
 		info(`Checking if ollama is installed`);
-		return PreCore.ollamaInstalled
+		return this.ollamaInstalled
 			.then(() => {
 				if (this.forceCheck) {
 					/**
@@ -185,7 +175,7 @@ export class PreCore extends BaseCore {
 				return this.installOllama();
 			})
 			.finally(async () => {
-				info(`Verifying ollama is usable ${await PreCore.ollamaInstalled}`);
+				info(`Verifying ollama is usable ${await this.ollamaInstalled}`);
 				endGroup();
 				info(`Creating folder and parent(s): ${this.modelDir}`);
 				return mkdir(this.modelDir, {
