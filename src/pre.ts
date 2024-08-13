@@ -1,11 +1,13 @@
 import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
-import { exportVariable, getBooleanInput, getInput, info, warning } from '@actions/core';
+import { exportVariable, getBooleanInput, getInput, info, toPlatformPath, warning } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
-import { cacheFile, downloadTool, evaluateVersions } from '@actions/tool-cache';
+import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { constants, mkdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { clean, coerce } from 'semver';
 import { BaseCore } from './base.js';
 import { FileHasher } from './fileHasher.js';
@@ -78,9 +80,14 @@ export class PreCore extends BaseCore {
 				}
 			});
 			const hashAsset = release?.assets.find((asset) => /^sha\d{3}sum/i.test(asset.name.toLowerCase()));
+			toPlatformPath;
 			if (executableAsset && hashAsset) {
+				const isArchive = ['.zip', '.7z', '.pkg', '.tar.gz'].some((extension) => executableAsset!.name.toLowerCase().endsWith(extension));
+				const programDir = os === 'windows' ? join(process.env['programfiles']!, 'ollama') : '/usr/local/bin';
+
 				return Promise.all([
-					downloadTool(executableAsset!.browser_download_url, '/usr/local/bin/ollama'),
+					// Download to tmp if archive otherwise straight to destination
+					downloadTool(executableAsset!.browser_download_url, join(isArchive ? tmpdir() : programDir, executableAsset!.name)),
 					fetch(new URL(hashAsset!.browser_download_url))
 						.then((response) => response.text())
 						.then((hashFile) => {
@@ -92,13 +99,30 @@ export class PreCore extends BaseCore {
 								throw new Error('file not in hashes', { cause: lines });
 							}
 						}),
-				]).then(([ollamaToolGuid, expectedHash]) => {
+				]).then(([ollamaPath, expectedHash]) => {
 					const hashType = /^sha\d{3}/i.exec(hashAsset!.name.toLowerCase())![0];
-					return FileHasher.hashFile(ollamaToolGuid, hashType).then((computedHash) => {
+					return FileHasher.hashFile(ollamaPath, hashType).then(async (computedHash) => {
 						if (timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(expectedHash!, 'hex'))) {
-							console.info(ollamaToolGuid, '/usr/local/bin/ollama', 'ollama', coerce(release!.tag_name)!.toString());
+							if (isArchive) {
+								// Extract if needed
+								if (ollamaPath.endsWith('.zip')) {
+									ollamaPath = await extractZip(ollamaPath, programDir);
+								} else if (ollamaPath.endsWith('.7z')) {
+									ollamaPath = await extract7z(ollamaPath, programDir);
+								} else if (ollamaPath.endsWith('.pkg')) {
+									ollamaPath = await extractXar(ollamaPath, programDir);
+								} else if (ollamaPath.endsWith('.tar.gz')) {
+									ollamaPath = await extractTar(ollamaPath, programDir);
+								}
 
-							return cacheFile(ollamaToolGuid, '/usr/local/bin/ollama', 'ollama', coerce(release!.tag_name)!.toString());
+								console.info('cacheDir', ollamaPath, 'ollama', coerce(release!.tag_name)!.toString());
+
+								return cacheDir(ollamaPath, 'ollama', coerce(release!.tag_name)!.toString());
+							} else {
+								console.info('cacheFile', ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString());
+
+								return cacheFile(ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString());
+							}
 						} else {
 							throw new Error('Hash mismatch', { cause: JSON.stringify({ expected: expectedHash, computed: computedHash }) });
 						}
