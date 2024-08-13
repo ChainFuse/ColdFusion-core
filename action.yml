@@ -6,7 +6,8 @@ inputs:
     description: Used to pull node distributions from ollama. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
   ollama-version:
-    description: 'Version Spec of the version to use. Examples: latest, 12.x, 10.15.1, >=10.15.0.'
+    description: 'Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0. See https://github.com/ollama/ollama/releases for the latest releases.'
+    default: 0.x
   check-latest:
     description: 'Set this option if you want the action to check for the latest available version of ollama that satisfies the version spec.'
     default: false
@@ -19,7 +20,6 @@ inputs:
     default: true
   modelDir:
     description: Location to download model. Sub folders for each model will be automatically created
-    required: true
     default: ${{ runner.temp }}/ColdFusion/models
 outputs:
   cache-hit:
