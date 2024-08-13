@@ -86,28 +86,13 @@ jobs:
         with:
           name: dist
           path: ${{ github.workspace }}/dist
-      - run: |
-          Get-ChildItem -Path ${{ runner.tool_cache }} -Recurse | ForEach-Object {
-            $permissions = bash -c "ls -ld '$($_.FullName)' | awk '{print `$1}'"
-            [PSCustomObject]@{
-              FullName = $_.FullName
-              Permissions = $permissions
-            }
-          } | Format-Table -AutoSize
+      - run: Get-ChildItem -Path ${{ runner.tool_cache }} -Recurse | Format-Table FullName
         if: runner.os != 'Windows'
         shell: pwsh
       - run: Get-ChildItem -Path ${{ runner.temp }} -Recurse | Format-Table FullName
         shell: pwsh
       - uses: ./
-      - run: |
-          run: |
-          Get-ChildItem -Path ${{ runner.tool_cache }} -Recurse | ForEach-Object {
-            $permissions = bash -c "ls -ld '$($_.FullName)' | awk '{print `$1}'"
-            [PSCustomObject]@{
-              FullName = $_.FullName
-              Permissions = $permissions
-            }
-          } | Format-Table -AutoSize
+      - run: Get-ChildItem -Path ${{ runner.tool_cache }} -Recurse | Format-Table FullName
         if: always() && runner.os != 'Windows'
         shell: pwsh
       - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table FullName
