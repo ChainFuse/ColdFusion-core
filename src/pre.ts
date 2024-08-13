@@ -32,7 +32,7 @@ export class PreCore extends BaseCore {
 			.catch();
 	}
 
-	private get ollamaVersion() {
+	private get ollamaVersionHttp() {
 		return this.octokit
 			.paginate('GET /repos/{owner}/{repo}/releases', {
 				owner: 'ollama',
@@ -54,7 +54,7 @@ export class PreCore extends BaseCore {
 	}
 
 	private installOllama() {
-		return this.ollamaVersion.then((release) => {
+		return this.ollamaVersionHttp.then((release) => {
 			const os = getInput('os', { required: true, trimWhitespace: true }).toLowerCase() as 'linux' | 'windows' | 'macos';
 			const arch = getInput('arch', { required: true, trimWhitespace: true }).toLowerCase() as 'x86' | 'x64' | 'arm' | 'arm64';
 			const executableAsset = release?.assets.find((asset) => {
@@ -83,11 +83,10 @@ export class PreCore extends BaseCore {
 			toPlatformPath;
 			if (executableAsset && hashAsset) {
 				const isArchive = ['.zip', '.7z', '.pkg', '.tar.gz'].some((extension) => executableAsset!.name.toLowerCase().endsWith(extension));
-				const programDir = os === 'windows' ? join(process.env['programfiles']!, 'ollama') : '/usr/local/bin';
 
 				return Promise.all([
 					// Download to tmp if archive otherwise straight to destination
-					downloadTool(executableAsset!.browser_download_url, join(isArchive ? tmpdir() : programDir, executableAsset!.name)),
+					downloadTool(executableAsset!.browser_download_url, join(tmpdir(), executableAsset!.name)),
 					fetch(new URL(hashAsset!.browser_download_url))
 						.then((response) => response.text())
 						.then((hashFile) => {
@@ -99,35 +98,37 @@ export class PreCore extends BaseCore {
 								throw new Error('file not in hashes', { cause: lines });
 							}
 						}),
-				]).then(([ollamaPath, expectedHash]) => {
-					const hashType = /^sha\d{3}/i.exec(hashAsset!.name.toLowerCase())![0];
-					return FileHasher.hashFile(ollamaPath, hashType).then(async (computedHash) => {
-						if (timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(expectedHash!, 'hex'))) {
-							if (isArchive) {
-								// Extract if needed
-								if (ollamaPath.endsWith('.zip')) {
-									ollamaPath = await extractZip(ollamaPath, programDir);
-								} else if (ollamaPath.endsWith('.7z')) {
-									ollamaPath = await extract7z(ollamaPath, programDir);
-								} else if (ollamaPath.endsWith('.pkg')) {
-									ollamaPath = await extractXar(ollamaPath, programDir);
-								} else if (ollamaPath.endsWith('.tar.gz')) {
-									ollamaPath = await extractTar(ollamaPath, programDir);
+				])
+					.then(([ollamaPath, expectedHash]) => {
+						const hashType = /^sha\d{3}/i.exec(hashAsset!.name.toLowerCase())![0];
+						return FileHasher.hashFile(ollamaPath, hashType).then(async (computedHash) => {
+							if (timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(expectedHash!, 'hex'))) {
+								if (isArchive) {
+									// Extract if needed
+									if (ollamaPath.endsWith('.zip')) {
+										ollamaPath = await extractZip(ollamaPath);
+									} else if (ollamaPath.endsWith('.7z')) {
+										ollamaPath = await extract7z(ollamaPath);
+									} else if (ollamaPath.endsWith('.pkg')) {
+										ollamaPath = await extractXar(ollamaPath);
+									} else if (ollamaPath.endsWith('.tar.gz')) {
+										ollamaPath = await extractTar(ollamaPath);
+									}
+
+									console.info('cacheDir', ollamaPath, 'ollama', coerce(release!.tag_name)!.toString());
+
+									return cacheDir(ollamaPath, 'ollama', coerce(release!.tag_name)!.toString());
+								} else {
+									console.info('cacheFile', ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString());
+
+									return cacheFile(ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString());
 								}
-
-								console.info('cacheDir', ollamaPath, 'ollama', coerce(release!.tag_name)!.toString());
-
-								return cacheDir(ollamaPath, 'ollama', coerce(release!.tag_name)!.toString());
 							} else {
-								console.info('cacheFile', ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString());
-
-								return cacheFile(ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString());
+								throw new Error('Hash mismatch', { cause: JSON.stringify({ expected: expectedHash, computed: computedHash }) });
 							}
-						} else {
-							throw new Error('Hash mismatch', { cause: JSON.stringify({ expected: expectedHash, computed: computedHash }) });
-						}
-					});
-				});
+						});
+					})
+					.then((cachedPath) => console.info('Cached ollama', cachedPath));
 			} else {
 				throw new Error('Executable and hash not found', { cause: JSON.stringify({ executableAsset, hashAsset }) });
 			}
