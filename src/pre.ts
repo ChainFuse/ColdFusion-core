@@ -66,15 +66,6 @@ export class PreCore extends BaseCore {
 					throw e;
 				});
 		}
-
-		// const matchingRelease = releases.find((release) => semver.satisfies(release.tag_name, this.requested));
-
-		// if (matchingRelease) {
-		// 	const version = matchingRelease.tag_name;
-		// 	console.log(`Matching version found: ${version}`);
-		// } else {
-		// 	console.log(`No matching version found for ${this.requested}`);
-		// }
 	}
 
 	private installOllama() {
