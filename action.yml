@@ -20,7 +20,7 @@ inputs:
   modelDir:
     description: Location to download model. Sub folders for each model will be automatically created
     required: true
-    default: ${{ runner.temp }}
+    default: ${{ runner.temp }}/ColdFusion/models
 outputs:
   cache-hit:
     description: 'A boolean value to indicate if a cache was hit.'
