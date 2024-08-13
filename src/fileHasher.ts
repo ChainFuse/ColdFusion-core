@@ -46,7 +46,7 @@ export class FileHasher {
 		});
 	}
 
-	private static async hashFile(path: string, hashType: Parameters<typeof createHash>[0] = 'sha256') {
+	public static async hashFile(path: string, hashType: Parameters<typeof createHash>[0] = 'sha256') {
 		return new Promise<ReturnType<ReturnType<typeof createHash>['digest']>>((resolve, reject) => {
 			const hash = createHash(hashType);
 			const fileStream = createReadStream(path);
