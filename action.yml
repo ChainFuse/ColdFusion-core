@@ -36,7 +36,6 @@ outputs:
 runs:
   using: 'node20'
   pre: 'dist/pre/index.js'
-  # pre-if:
   main: 'dist/main/index.js'
   post-if: success()
   post: 'dist/post/index.js'
