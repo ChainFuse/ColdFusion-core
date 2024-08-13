@@ -37,8 +37,11 @@ export class PreCore extends BaseCore {
 				per_page: 100,
 			})
 			.then(({ data }) => {
+				console.info('releases', data);
+
 				return data.find((release) => {
 					const releaseVersion = clean(release.tag_name);
+					console.info('release', release, this.requestedOllamaVersion, releaseVersion, satisfies(this.requestedOllamaVersion, releaseVersion));
 
 					if (releaseVersion) {
 						return satisfies(this.requestedOllamaVersion, releaseVersion);
