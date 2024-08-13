@@ -1,5 +1,5 @@
 import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
-import { addPath, exportVariable, getBooleanInput, getInput, info, toPlatformPath, warning } from '@actions/core';
+import { addPath, endGroup, exportVariable, getBooleanInput, getInput, info, startGroup, warning } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
 import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip } from '@actions/tool-cache';
@@ -33,6 +33,7 @@ export class PreCore extends BaseCore {
 	}
 
 	private get ollamaVersionHttp() {
+		info('Getting Ollama versions from github releases');
 		return this.octokit
 			.paginate('GET /repos/{owner}/{repo}/releases', {
 				owner: 'ollama',
@@ -45,6 +46,7 @@ export class PreCore extends BaseCore {
 					data.map((release) => clean(release.tag_name)!),
 					this.requestedOllamaVersion,
 				);
+				info(`User requested ${this.requestedOllamaVersion}; Matched version ${targetVersion}`);
 
 				return data.find((release) => clean(release.tag_name)! === targetVersion);
 			})
@@ -80,9 +82,10 @@ export class PreCore extends BaseCore {
 				}
 			});
 			const hashAsset = release?.assets.find((asset) => /^sha\d{3}sum/i.test(asset.name.toLowerCase()));
-			toPlatformPath;
+
 			if (executableAsset && hashAsset) {
 				const isArchive = ['.zip', '.7z', '.pkg', '.tar.gz'].some((extension) => executableAsset!.name.toLowerCase().endsWith(extension));
+				info(`Downloading ${isArchive ? 'archive' : 'executable'} to ${tmpdir()}`);
 
 				return Promise.all([
 					// Download to tmp if archive otherwise straight to destination
@@ -99,11 +102,16 @@ export class PreCore extends BaseCore {
 							}
 						}),
 				]).then(([ollamaPath, expectedHash]) => {
+					info(`Downloaded ${ollamaPath}`);
+
 					const hashType = /^sha\d{3}/i.exec(hashAsset!.name.toLowerCase())![0];
 					return FileHasher.hashFile(ollamaPath, hashType).then(async (computedHash) => {
 						if (timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(expectedHash!, 'hex'))) {
+							info(`${isArchive ? 'archive' : 'executable'} ${executableAsset.name} verified against hash`);
+
 							if (isArchive) {
-								// Extract if needed
+								info('Extracting archive in place');
+
 								if (ollamaPath.endsWith('.zip')) {
 									ollamaPath = await extractZip(ollamaPath);
 								} else if (ollamaPath.endsWith('.7z')) {
@@ -114,13 +122,21 @@ export class PreCore extends BaseCore {
 									ollamaPath = await extractTar(ollamaPath);
 								}
 
-								console.info('cacheDir', ollamaPath, 'ollama', coerce(release!.tag_name)!.toString());
+								info(`Extracted ${ollamaPath}`);
 
-								return cacheDir(ollamaPath, 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => addPath(join(cachedPath, os === 'windows' ? 'ollama.exe' : 'ollama')));
+								info("Caching tool archive in github's tool cache");
+								return cacheDir(ollamaPath, 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
+									info(`Cached tool archive ${cachedPath}`);
+									addPath(join(cachedPath, os === 'windows' ? 'ollama.exe' : 'ollama'));
+									info(`Added to path ${join(cachedPath, os === 'windows' ? 'ollama.exe' : 'ollama')}`);
+								});
 							} else {
-								console.info('cacheFile', ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString());
-
-								return cacheFile(ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => addPath(cachedPath));
+								info("Caching tool in github's tool cache");
+								return cacheFile(ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
+									info(`Cached tool ${cachedPath}`);
+									addPath(cachedPath);
+									info(`Added to path ${cachedPath}`);
+								});
 							}
 						} else {
 							throw new Error('Hash mismatch', { cause: JSON.stringify({ expected: expectedHash, computed: computedHash }) });
@@ -136,12 +152,12 @@ export class PreCore extends BaseCore {
 	}
 
 	public async main() {
-		info(`Creating folder and parent(s): ${this.modelDir}`);
-
 		/**
 		 * @link https://github.com/nischalj10/headless-ollama/blob/master/preload.sh
 		 * Install ollama
 		 */
+		startGroup('Ollama installation');
+		info(`Checking if ollama is installed`);
 		return PreCore.ollamaInstalled
 			.then(() => {
 				if (this.forceCheck) {
@@ -151,10 +167,13 @@ export class PreCore extends BaseCore {
 				}
 			})
 			.catch(() => {
+				info('Ollama not installed');
 				return this.installOllama();
 			})
-			.finally(() =>
-				mkdir(this.modelDir, {
+			.finally(() => {
+				endGroup();
+				info(`Creating folder and parent(s): ${this.modelDir}`);
+				return mkdir(this.modelDir, {
 					recursive: true,
 					// u=rwx,g=rx,o=rx
 					mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IXUSR | constants.S_IRGRP | constants.S_IXGRP | constants.S_IROTH | constants.S_IXOTH,
@@ -165,8 +184,8 @@ export class PreCore extends BaseCore {
 							warning('Cache service not available. Falling back to download');
 						}
 					})
-					.catch(),
-			);
+					.catch();
+			});
 	}
 }
 
