@@ -87,7 +87,7 @@ export class PreCore extends BaseCore {
 			const hashAsset = release?.assets.find((asset) => /^sha\d{3}sum/i.test(asset.name.toLowerCase()));
 
 			if (executableAsset && hashAsset) {
-				const isArchive = ['.zip', '.7z', '.pkg', '.tar.gz'].some((extension) => executableAsset!.name.toLowerCase().endsWith(extension));
+				const isArchive = ['.zip', '.7z', '.pkg', '.tar.gz', '.tgz'].some((extension) => executableAsset!.name.toLowerCase().endsWith(extension));
 				info(`Downloading ${executableAsset.name} to ${tmpdir()}`);
 
 				return Promise.all([
@@ -121,7 +121,7 @@ export class PreCore extends BaseCore {
 									ollamaPath = await extract7z(ollamaPath);
 								} else if (ollamaPath.endsWith('.pkg')) {
 									ollamaPath = await extractXar(ollamaPath);
-								} else if (ollamaPath.endsWith('.tar.gz')) {
+								} else if (['.tar.gz', '.tgz'].some((extension) => executableAsset!.name.toLowerCase().endsWith(extension))) {
 									ollamaPath = await extractTar(ollamaPath);
 								}
 
