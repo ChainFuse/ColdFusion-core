@@ -38,9 +38,10 @@ export class PreCore extends BaseCore {
 			})
 			.then(({ data }) => {
 				return data.find((release) => {
-					const temp = clean(release.tag_name);
-					if (temp) {
-						return satisfies(this.requestedOllamaVersion, temp);
+					const releaseVersion = clean(release.tag_name);
+
+					if (releaseVersion) {
+						return satisfies(this.requestedOllamaVersion, releaseVersion);
 					} else {
 						return false;
 					}
