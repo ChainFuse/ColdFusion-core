@@ -37,7 +37,7 @@ runs:
   using: 'node20'
   pre: 'dist/pre/index.js'
   main: 'dist/main/index.js'
-  post-if: success()
+  post-if: always()
   post: 'dist/post/index.js'
 branding:
   color: 'blue'
