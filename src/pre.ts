@@ -6,19 +6,21 @@ import { cacheFile, downloadTool } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { constants, mkdir } from 'node:fs/promises';
-import { clean, coerce, satisfies } from 'semver';
+import { clean, coerce, satisfies, type SemVer } from 'semver';
 import { BaseCore } from './base.js';
 import { FileHasher } from './fileHasher.js';
 
 export class PreCore extends BaseCore {
-	private requested: ReturnType<typeof coerce>;
+	private requestedOllamaVersion: SemVer;
 	private forceCheck = getBooleanInput('check-latest', { required: true, trimWhitespace: true });
 
 	constructor() {
 		super();
 
-		this.requested = coerce(getInput('ollama-version', { required: true, trimWhitespace: true }));
-		if (this.requested === null) {
+		const requestedOllamaVersionRaw = coerce(getInput('ollama-version', { required: true, trimWhitespace: true }));
+		if (requestedOllamaVersionRaw) {
+			this.requestedOllamaVersion = requestedOllamaVersionRaw;
+		} else {
 			throw new Error('Invalid version requested');
 		}
 
