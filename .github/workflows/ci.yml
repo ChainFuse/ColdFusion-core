@@ -86,13 +86,13 @@ jobs:
         with:
           name: dist
           path: ${{ github.workspace }}/dist
-      - run: Get-ChildItem -Path ${{ runner.tool_cache }} -Recurse | Format-Table -AutoSize FullName
+      - run: ls -liA ${{ runner.tool_cache }}
         if: runner.os != 'Windows'
         shell: pwsh
       - run: Get-ChildItem -Path ${{ runner.temp }} -Recurse | Format-Table -AutoSize FullName
         shell: pwsh
       - uses: ./
-      - run: Get-ChildItem -Path ${{ runner.tool_cache }} -Recurse | Format-Table -AutoSize FullName
+      - run: ls -liA ${{ runner.tool_cache }}
         if: always() && runner.os != 'Windows'
         shell: pwsh
       - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table -AutoSize FullName
