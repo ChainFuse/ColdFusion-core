@@ -55,10 +55,30 @@ export class PreCore extends BaseCore {
 
 	private installOllama() {
 		return this.ollamaVersion.then((release) => {
-			/**
-			 * @todo add multi platform support
-			 */
-			const executableAsset = release?.assets.find((asset) => asset.name.toLowerCase().includes('darwin') && !asset.name.toLowerCase().endsWith('.zip'));
+			const os = getInput('os', { required: true, trimWhitespace: true }).toLowerCase() as 'linux' | 'windows' | 'macos';
+			const arch = getInput('arch', { required: true, trimWhitespace: true }).toLowerCase() as 'x86' | 'x64' | 'arm' | 'arm64';
+			const executableAsset = release?.assets.find((asset) => {
+				switch (os) {
+					case 'macos':
+						return asset.name.toLowerCase().includes('darwin') && !asset.name.toLowerCase().endsWith('.zip');
+					case 'linux':
+						switch (arch) {
+							case 'x64':
+								return asset.name.toLowerCase().includes(os) && !asset.name.toLowerCase().endsWith('amd64');
+							case 'arm64':
+								return asset.name.toLowerCase().includes(os) && !asset.name.toLowerCase().endsWith(arch);
+							default:
+								return false;
+						}
+					case 'windows':
+						switch (arch) {
+							case 'x64':
+								return asset.name.toLowerCase().includes(os) && !asset.name.toLowerCase().endsWith('amd64.zip');
+							default:
+								return false;
+						}
+				}
+			});
 			const hashAsset = release?.assets.find((asset) => /^sha\d{3}sum/i.test(asset.name.toLowerCase()));
 			if (executableAsset && hashAsset) {
 				return Promise.all([
