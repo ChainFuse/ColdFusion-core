@@ -7,7 +7,7 @@ class PostCore extends BaseCore {
 		startGroup('Stopping service');
 		switch (this.os) {
 			case 'macos':
-				return exec('sudo launchctl', ['unload', '-w', this.macOsPlist]).then(() => {
+				return exec('sudo launchctl', ['bootout', '-w', this.macOsPlist]).then(() => {
 					info('Stopped service');
 					endGroup();
 				});

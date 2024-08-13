@@ -46,7 +46,7 @@ export class MainCore extends BaseCore {
 	private startService() {
 		startGroup('Service running');
 		info('Starting service');
-		return exec('sudo launchctl', ['load', '-w', this.macOsPlist]).then(() => {
+		return exec('sudo launchctl', ['bootstrap', '-w', this.macOsPlist]).then(() => {
 			info('Started service');
 			endGroup();
 		});
