@@ -148,7 +148,7 @@ export class PreCore extends BaseCore {
 									});
 							} else {
 								info('Adding execute bit to executable');
-								stat(ollamaPath)
+								return stat(ollamaPath)
 									.then(({ mode }) => {
 										info(`${PreCore.modeToString(mode)} ${ollamaPath}`);
 										return chmod(ollamaPath, mode | constants.S_IXUSR).then(() => info(`${PreCore.modeToString(mode | constants.S_IXUSR)} ${ollamaPath}`));
