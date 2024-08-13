@@ -96,6 +96,8 @@ export class PreCore extends BaseCore {
 					const hashType = /^sha\d{3}/i.exec(hashAsset!.name.toLowerCase())![0];
 					return FileHasher.hashFile(ollamaToolGuid, hashType).then((computedHash) => {
 						if (timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(expectedHash!, 'hex'))) {
+							console.info(ollamaToolGuid, '/usr/local/bin/ollama', 'ollama', coerce(release!.tag_name)!.toString());
+
 							return cacheFile(ollamaToolGuid, '/usr/local/bin/ollama', 'ollama', coerce(release!.tag_name)!.toString());
 						} else {
 							throw new Error('Hash mismatch', { cause: JSON.stringify({ expected: expectedHash, computed: computedHash }) });
