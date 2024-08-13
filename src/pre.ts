@@ -37,8 +37,6 @@ export class PreCore extends BaseCore {
 	}
 
 	private get ollamaVersion() {
-		console.info('requestedOllamaVersion', this.requestedOllamaVersion);
-
 		return getOctokit(getInput('token', { required: true, trimWhitespace: true }))
 			.rest.repos.listReleases({
 				owner: 'ollama',
