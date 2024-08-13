@@ -87,19 +87,18 @@ export class PreCore extends BaseCore {
 						.then((response) => response.text())
 						.then((hashFile) => {
 							const lines = hashFile.split('\n');
-							const line = lines.find((line) => line.endsWith(executableAsset!.name));
-							if (line) {
-								return line;
+							const [expectedHash] = lines.find((line) => line.endsWith(executableAsset!.name))?.split(' ') ?? [];
+							if (expectedHash) {
+								return expectedHash;
 							} else {
 								throw new Error('file not in hashes', { cause: lines });
 							}
 						}),
-				]).then(([ollamaToolGuid, ollamaHashLine]) => {
+				]).then(([ollamaToolGuid, expectedHash]) => {
 					console.info('ollamaToolGuid', ollamaToolGuid);
-					console.info('ollamaHashLine', ollamaHashLine);
+					console.info('ollamaHashLine', expectedHash);
 
 					const hashType = /^sha\d{3}/i.exec(hashAsset!.name.toLowerCase())![0];
-					const [expectedHash] = ollamaHashLine.split(' ');
 					return FileHasher.hashFile(ollamaToolGuid, hashType).then((computedHash) => {
 						if (timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(expectedHash!, 'hex'))) {
 							return cacheFile(ollamaToolGuid, '/usr/local/bin/ollama', 'ollama', coerce(release!.tag_name)!.toString());
