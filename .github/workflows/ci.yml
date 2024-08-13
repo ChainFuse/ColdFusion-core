@@ -92,7 +92,7 @@ jobs:
       - run: Get-ChildItem -Path ${{ runner.temp }} -Recurse | Format-Table -AutoSize FullName
         shell: pwsh
       - uses: ./
-      - run: ls -liA ${{ runner.tool_cache }}
+      - run: ls -liA ${{ runner.tool_cache }}/ollama/*/${{ runner.arch }}
         if: always() && runner.os != 'Windows'
         shell: pwsh
       - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table -AutoSize FullName
