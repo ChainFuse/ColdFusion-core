@@ -116,7 +116,7 @@ export class PreCore extends BaseCore {
 		 */
 		return PreCore.ollamaInstalled
 			.then(() => {
-				if (getBooleanInput('check-latest', { trimWhitespace: true })) {
+				if (this.forceCheck) {
 					/**
 					 * @todo
 					 * */
