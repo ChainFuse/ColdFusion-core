@@ -1,3 +1,5 @@
+import { error, info } from '@actions/core';
+import { exec } from '@actions/exec';
 import { cpus, platform } from 'node:os';
 import { arch } from 'node:process';
 import { BaseCore } from './base.js';
@@ -28,6 +30,16 @@ export class MainCore extends BaseCore {
 
 	public async main() {
 		await MainCore.pre();
+
+		// https://medium.com/@chhaybunsy/unleash-your-machine-learning-models-how-to-customize-ollamas-storage-directory-c9ea1ea2961a
+
+		info(`Downloading model ${this.model}`);
+		return exec(this.ollamaPath, ['pull', this.model], { env: { ...process.env, OLLAMA_MODELS: this.modelDir } })
+			.then(() => info(`Downloaded model ${this.model}`))
+			.catch((e) => {
+				error(`find ${e}`);
+				throw e;
+			});
 	}
 }
 

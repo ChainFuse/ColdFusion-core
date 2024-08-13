@@ -195,18 +195,9 @@ export class PreCore extends BaseCore {
 
 					startGroup('Model installation');
 					info(`Creating folder and parent(s): ${this.modelDir}`);
-					return mkdirP(this.modelDir).then(() => {
-						info(`Created folder and parent(s): ${this.modelDir}`);
-						// https://medium.com/@chhaybunsy/unleash-your-machine-learning-models-how-to-customize-ollamas-storage-directory-c9ea1ea2961a
-
-						info(`Downloading model ${this.model}`);
-						return exec(this.ollamaPath, ['pull', this.model], { env: { ...process.env, OLLAMA_MODELS: this.modelDir } })
-							.then(() => info(`Downloaded model ${this.model}`))
-							.catch((e) => {
-								error(`find ${e}`);
-								throw e;
-							});
-					});
+					return mkdirP(this.modelDir)
+						.then(() => info(`Created folder and parent(s): ${this.modelDir}`))
+						.finally(() => endGroup());
 				}),
 			);
 	}
