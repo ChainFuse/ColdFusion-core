@@ -13,6 +13,9 @@ import { BaseCore } from './base.js';
 import { FileHasher } from './fileHasher.js';
 
 export class PreCore extends BaseCore {
+	private os = getInput('os', { required: true, trimWhitespace: true }).toLowerCase() as 'linux' | 'windows' | 'macos';
+	private arch = getInput('arch', { required: true, trimWhitespace: true }).toLowerCase() as 'x86' | 'x64' | 'arm' | 'arm64';
+
 	private requestedOllamaVersion = getInput('ollama-version', { required: true, trimWhitespace: true });
 	private forceCheck = getBooleanInput('check-latest', { required: true, trimWhitespace: true });
 	private octokit = getOctokit(getInput('token', { required: true, trimWhitespace: true }));
@@ -24,8 +27,9 @@ export class PreCore extends BaseCore {
 	}
 
 	private get ollamaInstalled() {
-		console.info('find', find('ollama', this.requestedOllamaVersion));
-		return exec(find('ollama', this.requestedOllamaVersion), undefined, { silent: true })
+		const path = join(find('ollama', this.requestedOllamaVersion), this.os === 'windows' ? 'ollama.exe' : 'ollama');
+		console.info('find', path);
+		return exec(path, undefined, { silent: true })
 			.then((exitCode) => {
 				console.debug('ollama exit code', exitCode);
 				return true;
@@ -60,25 +64,23 @@ export class PreCore extends BaseCore {
 
 	private installOllama() {
 		return this.ollamaVersionHttp.then((release) => {
-			const os = getInput('os', { required: true, trimWhitespace: true }).toLowerCase() as 'linux' | 'windows' | 'macos';
-			const arch = getInput('arch', { required: true, trimWhitespace: true }).toLowerCase() as 'x86' | 'x64' | 'arm' | 'arm64';
 			const executableAsset = release?.assets.find((asset) => {
-				switch (os) {
+				switch (this.os) {
 					case 'macos':
 						return asset.name.toLowerCase().includes('darwin') && !asset.name.toLowerCase().endsWith('.zip');
 					case 'linux':
-						switch (arch) {
+						switch (this.arch) {
 							case 'x64':
-								return asset.name.toLowerCase().includes(os) && !asset.name.toLowerCase().endsWith('amd64');
+								return asset.name.toLowerCase().includes(this.os) && !asset.name.toLowerCase().endsWith('amd64');
 							case 'arm64':
-								return asset.name.toLowerCase().includes(os) && !asset.name.toLowerCase().endsWith(arch);
+								return asset.name.toLowerCase().includes(this.os) && !asset.name.toLowerCase().endsWith(this.arch);
 							default:
 								return false;
 						}
 					case 'windows':
-						switch (arch) {
+						switch (this.arch) {
 							case 'x64':
-								return asset.name.toLowerCase().includes(os) && !asset.name.toLowerCase().endsWith('amd64.zip');
+								return asset.name.toLowerCase().includes(this.os) && !asset.name.toLowerCase().endsWith('amd64.zip');
 							default:
 								return false;
 						}
@@ -135,7 +137,7 @@ export class PreCore extends BaseCore {
 								});
 							} else {
 								info("Caching tool in github's tool cache");
-								return cacheFile(ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
+								return cacheFile(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
 									info(`Cached tool ${cachedPath}`);
 									addPath(cachedPath);
 									info(`Added to path ${cachedPath}`);
