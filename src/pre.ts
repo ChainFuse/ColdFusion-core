@@ -45,8 +45,8 @@ export class PreCore extends BaseCore {
 				repo: 'ollama',
 				per_page: 100,
 			})
-			.then(({ data: releases }) => {
-				return releases.find((release) => {
+			.then(({ data }) => {
+				return data.find((release) => {
 					const temp = clean(release.tag_name);
 					if (temp) {
 						return satisfies(this.requestedOllamaVersion, temp);
