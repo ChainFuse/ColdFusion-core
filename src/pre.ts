@@ -2,10 +2,10 @@ import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
 import { addPath, endGroup, error, exportVariable, getBooleanInput, getInput, info, startGroup, warning } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
+import { mkdirP } from '@actions/io';
 import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip, find } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
-import { constants, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { clean, coerce } from 'semver';
@@ -179,18 +179,13 @@ export class PreCore extends BaseCore {
 				info(`Verifying ollama is usable ${await this.ollamaInstalled}`);
 				endGroup();
 				info(`Creating folder and parent(s): ${this.modelDir}`);
-				return mkdir(this.modelDir, {
-					recursive: true,
-					// u=rwx,g=rx,o=rx
-					mode: constants.S_IRUSR | constants.S_IWUSR | constants.S_IXUSR | constants.S_IRGRP | constants.S_IXGRP | constants.S_IROTH | constants.S_IXOTH,
-				})
-					.then(() => {
-						if (isGhCacheAvailable()) {
-						} else {
-							warning('Cache service not available. Falling back to download');
-						}
-					})
-					.catch();
+				return mkdirP(this.modelDir).then(() => {
+					if (isGhCacheAvailable()) {
+						info(`Created folder and parent(s): ${this.modelDir}`);
+					} else {
+						warning('Cache service not available. Falling back to download');
+					}
+				});
 			});
 	}
 }
