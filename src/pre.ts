@@ -1,5 +1,5 @@
 import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
-import { addPath, endGroup, error, exportVariable, getBooleanInput, getInput, info, startGroup, warning } from '@actions/core';
+import { addPath, debug, endGroup, error, exportVariable, getBooleanInput, getInput, info, startGroup, warning } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
 import { mkdirP } from '@actions/io';
@@ -130,8 +130,8 @@ export class PreCore extends BaseCore {
 								info('Adding execute bit to executable');
 								return stat(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'))
 									.then(({ mode }) => {
-										info(`${PreCore.modeToString(mode)} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`);
-										return chmod(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'), mode | constants.S_IXUSR).then(() => info(`${PreCore.modeToString(mode | constants.S_IXUSR)} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`));
+										debug(`${PreCore.modeToString(mode)} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`);
+										return chmod(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'), mode | constants.S_IXUSR).then(() => debug(`${PreCore.modeToString(mode | constants.S_IXUSR)} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`));
 									})
 									.then(() => {
 										info("Caching tool archive in github's tool cache");
@@ -145,8 +145,8 @@ export class PreCore extends BaseCore {
 								info('Adding execute bit to executable');
 								return stat(ollamaPath)
 									.then(({ mode }) => {
-										info(`${PreCore.modeToString(mode)} ${ollamaPath}`);
-										return chmod(ollamaPath, mode | constants.S_IXUSR).then(() => info(`${PreCore.modeToString(mode | constants.S_IXUSR)} ${ollamaPath}`));
+										debug(`${PreCore.modeToString(mode)} ${ollamaPath}`);
+										return chmod(ollamaPath, mode | constants.S_IXUSR).then(() => debug(`${PreCore.modeToString(mode | constants.S_IXUSR)} ${ollamaPath}`));
 									})
 									.then(() => {
 										info("Caching tool in github's tool cache");
