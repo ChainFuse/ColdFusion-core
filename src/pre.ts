@@ -170,7 +170,8 @@ export class PreCore extends BaseCore {
 				info('Ollama not installed');
 				return this.installOllama();
 			})
-			.finally(() => {
+			.finally(async () => {
+				info(`Verifying ollama is usable ${await PreCore.ollamaInstalled}`);
 				endGroup();
 				info(`Creating folder and parent(s): ${this.modelDir}`);
 				return mkdir(this.modelDir, {
