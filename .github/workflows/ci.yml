@@ -100,9 +100,9 @@ jobs:
         shell: pwsh
       - run: ls -liA ~/Library/LaunchAgents/
         if: always() && runner.os == 'macOS'
-      - run: launchctl list
+      - run: sudo launchctl list
         if: always() && runner.os == 'macOS'
-      - run: launchctl bootstrap user/$UID ~/Library/LaunchAgents/com.ollama.ollama.plist
+      - run: sudo launchctl bootstrap user/$UID ~/Library/LaunchAgents/com.ollama.ollama.plist
         if: always() && runner.os == 'macOS'
       - run: Get-ChildItem -Path ${{ runner.temp }}/ColdFusion/models -Recurse | Format-Table FullName
         if: always()
