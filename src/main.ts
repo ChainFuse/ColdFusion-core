@@ -1,6 +1,5 @@
-import { error, info } from '@actions/core';
+import { endGroup, error, info, startGroup } from '@actions/core';
 import { exec } from '@actions/exec';
-import { chown } from 'node:fs/promises';
 import { cpus, platform } from 'node:os';
 import { arch } from 'node:process';
 import { BaseCore } from './base.js';
@@ -26,12 +25,31 @@ export class MainCore extends BaseCore {
 			}
 		}
 
-		// Setup service
+		await this.createService();
+		await this.startService();
+	}
+
+	private async createService() {
+		startGroup('Setup service');
 		switch (this.os) {
 			case 'macos':
-				const plist = '/Library/LaunchDaemons/com.ollama.ollama.plist';
-				return Promise.all([exec('sudo defaults', ['write', plist, 'Label', '-string', 'com.ollama.ollama']), exec('sudo defaults', ['write', plist, 'ProgramArguments', '-array', '/usr/local/bin/ollama', 'serve']), exec('sudo defaults', ['write', plist, 'RunAtLoad', '-bool', 'true'])]).then(() => chown(plist));
+				info(`Generating plist file ${this.macOsPlist}`);
+				return Promise.all([exec('sudo defaults', ['write', this.macOsPlist, 'Label', '-string', 'com.ollama.ollama']), exec('sudo defaults', ['write', this.macOsPlist, 'ProgramArguments', '-array', '/usr/local/bin/ollama', 'serve']), exec('sudo defaults', ['write', this.macOsPlist, 'RunAtLoad', '-bool', 'true'])]).then(() =>
+					exec('sudo chown', ['root:wheel', this.macOsPlist]).then(() => {
+						info(`Generated plist file ${this.macOsPlist}`);
+						endGroup();
+					}),
+				);
 		}
+	}
+
+	private startService() {
+		startGroup('Service running');
+		info('Starting service');
+		return exec('sudo launchctl', ['load', '-w', this.macOsPlist]).then(() => {
+			info('Started service');
+			endGroup();
+		});
 	}
 
 	public async main() {

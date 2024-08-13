@@ -4,6 +4,7 @@ import { format, join, parse } from 'node:path';
 
 export class BaseCore {
 	protected os = getInput('os', { required: true, trimWhitespace: true }).toLowerCase() as 'linux' | 'windows' | 'macos';
+	protected macOsPlist = '/Library/LaunchDaemons/com.ollama.ollama.plist';
 
 	protected requestedOllamaVersion = getInput('ollama-version', { required: true, trimWhitespace: true });
 	protected model: string = getInput('model', { required: true, trimWhitespace: true });
