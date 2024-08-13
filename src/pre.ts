@@ -126,16 +126,18 @@ export class PreCore extends BaseCore {
 
 								info("Caching tool archive in github's tool cache");
 								return cacheDir(ollamaPath, 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
+									const fullPath = join(cachedPath, os === 'windows' ? 'ollama.exe' : 'ollama');
 									info(`Cached tool archive ${cachedPath}`);
-									addPath(join(cachedPath, os === 'windows' ? 'ollama.exe' : 'ollama'));
-									info(`Added to path ${join(cachedPath, os === 'windows' ? 'ollama.exe' : 'ollama')}`);
+									addPath(fullPath);
+									info(`Added to path ${fullPath}`);
 								});
 							} else {
 								info("Caching tool in github's tool cache");
 								return cacheFile(ollamaPath, os === 'windows' ? 'ollama.exe' : 'ollama', 'ollama', coerce(release!.tag_name)!.toString()).then((cachedPath) => {
+									const fullPath = join(cachedPath, os === 'windows' ? 'ollama.exe' : 'ollama');
 									info(`Cached tool ${cachedPath}`);
-									addPath(cachedPath);
-									info(`Added to path ${cachedPath}`);
+									addPath(fullPath);
+									info(`Added to path ${fullPath}`);
 								});
 							}
 						} else {
