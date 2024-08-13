@@ -7,8 +7,6 @@ export class BaseCore {
 	protected arch = getInput('arch', { required: true, trimWhitespace: true }).toLowerCase() as 'x86' | 'x64' | 'arm' | 'arm64';
 
 	protected requestedOllamaVersion = getInput('ollama-version', { required: true, trimWhitespace: true });
-	// protected ollamaCachePath = find('ollama', this.requestedOllamaVersion);
-	// protected ollamaPath = join(this.ollamaCachePath, '..', '..');
 	protected model: string = getInput('model', { required: true, trimWhitespace: true });
 	// Do format(parse()) for input validation
 	protected modelDir: string = format(parse(getInput('modelDir', { required: true, trimWhitespace: true })));
