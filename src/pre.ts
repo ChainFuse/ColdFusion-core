@@ -1,5 +1,4 @@
-import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
-import { addPath, debug, endGroup, error, exportVariable, getBooleanInput, getInput, info, startGroup, warning } from '@actions/core';
+import { addPath, debug, endGroup, error, exportVariable, getBooleanInput, getInput, info, startGroup } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
 import { mkdirP } from '@actions/io';
@@ -168,8 +167,6 @@ export class PreCore extends BaseCore {
 				throw new Error('Executable and hash not found', { cause: JSON.stringify({ executableAsset, hashAsset }) });
 			}
 		});
-
-		// https://medium.com/@chhaybunsy/unleash-your-machine-learning-models-how-to-customize-ollamas-storage-directory-c9ea1ea2961a
 	}
 
 	public async main() {
@@ -199,11 +196,16 @@ export class PreCore extends BaseCore {
 					startGroup('Model installation');
 					info(`Creating folder and parent(s): ${this.modelDir}`);
 					return mkdirP(this.modelDir).then(() => {
-						if (isGhCacheAvailable()) {
-							info(`Created folder and parent(s): ${this.modelDir}`);
-						} else {
-							warning('Cache service not available. Falling back to download');
-						}
+						info(`Created folder and parent(s): ${this.modelDir}`);
+						// https://medium.com/@chhaybunsy/unleash-your-machine-learning-models-how-to-customize-ollamas-storage-directory-c9ea1ea2961a
+
+						info(`Downloading model ${this.model}`);
+						return exec(this.ollamaPath, ['pull', this.model], { env: { ...process.env, OLLAMA_MODELS: this.modelDir } })
+							.then(() => info(`Downloaded model ${this.model}`))
+							.catch((e) => {
+								error(`find ${e}`);
+								throw e;
+							});
 					});
 				}),
 			);
