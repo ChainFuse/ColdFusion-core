@@ -12,6 +12,6 @@ export class BaseCore {
 	protected modelDir: string = format(parse(getInput('modelDir', { required: true, trimWhitespace: true })));
 
 	protected get ollamaPath() {
-		return join(find('ollama', this.requestedOllamaVersion), '..', '..');
+		return join(find('ollama', this.requestedOllamaVersion), this.os === 'windows' ? 'ollama.exe' : 'ollama');
 	}
 }
