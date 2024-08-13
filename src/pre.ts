@@ -26,8 +26,8 @@ export class PreCore extends BaseCore {
 	}
 
 	private get ollamaInstalled() {
-		console.info('find', join(...this.ollamaPath.slice(0, -2)));
-		return exec(join(...this.ollamaPath.slice(0, -2)), undefined, { silent: true })
+		console.info('find', this.ollamaPath);
+		return exec(this.ollamaPath, undefined, { silent: true })
 			.then((exitCode) => {
 				console.debug('ollama exit code', exitCode);
 				return true;
