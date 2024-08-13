@@ -39,7 +39,7 @@ export class PreCore extends BaseCore {
 				{
 					owner: 'ollama',
 					repo: 'ollama',
-					per_page: 100,
+					per_page: 5,
 				},
 				// ({ data }, done) => allVersions.push(...data),
 			)
