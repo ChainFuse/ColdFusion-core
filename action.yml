@@ -8,6 +8,12 @@ inputs:
   ollama-version:
     description: 'Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0. See https://github.com/ollama/ollama/releases for the latest releases.'
     default: 0.x
+  os:
+    description: 'INTERNAL: DO NOT TOUCH'
+    default: ${{ runner.os }}
+  arch:
+    description: 'INTERNAL: DO NOT TOUCH'
+    default: ${{ runner.arch }}
   check-latest:
     description: 'Set this option if you want the action to check for the latest available version of ollama that satisfies the version spec.'
     default: false
