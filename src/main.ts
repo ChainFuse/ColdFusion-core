@@ -34,7 +34,7 @@ export class MainCore extends BaseCore {
 		switch (this.os) {
 			case 'macos':
 				info(`Generating plist file ${this.macOsPlist}`);
-				return Promise.all([exec('sudo defaults', ['write', this.macOsPlist, 'Label', '-string', 'com.ollama.ollama']), exec('sudo defaults', ['write', this.macOsPlist, 'ProgramArguments', '-array', '/usr/local/bin/ollama', 'serve']), exec('sudo defaults', ['write', this.macOsPlist, 'RunAtLoad', '-bool', 'true'])]).then(() =>
+				return Promise.all([exec('sudo defaults', ['write', this.macOsPlist, 'Label', '-string', 'com.ollama.ollama']), exec('sudo defaults', ['write', this.macOsPlist, 'ProgramArguments', '-array', this.ollamaPath, 'serve']), exec('sudo defaults', ['write', this.macOsPlist, 'RunAtLoad', '-bool', 'true'])]).then(() =>
 					exec('sudo chown', ['root:wheel', this.macOsPlist]).then(() => {
 						info(`Generated plist file ${this.macOsPlist}`);
 						endGroup();
