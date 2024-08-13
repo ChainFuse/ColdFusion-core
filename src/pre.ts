@@ -2,7 +2,7 @@ import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
 import { addPath, endGroup, error, exportVariable, getBooleanInput, getInput, info, startGroup, warning } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
-import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip } from '@actions/tool-cache';
+import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip, find } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { constants, mkdir } from 'node:fs/promises';
@@ -26,7 +26,7 @@ export class PreCore extends BaseCore {
 	}
 
 	private get ollamaInstalled() {
-		console.info('ollama', this.requestedOllamaVersion, this.ollamaCachePath, join(this.ollamaCachePath, '..'), this.ollamaPath);
+		console.info('ollama', this.requestedOllamaVersion, find('ollama', this.requestedOllamaVersion), join(find('ollama', this.requestedOllamaVersion), '..'), join(find('ollama', this.requestedOllamaVersion), '..', '..'));
 		return exec(this.ollamaPath, undefined, { silent: true })
 			.then((exitCode) => {
 				console.debug('ollama exit code', exitCode);
