@@ -69,16 +69,16 @@ export class PreCore extends BaseCore {
 					case 'linux':
 						switch (this.arch) {
 							case 'x64':
-								return asset.name.toLowerCase().includes(this.os) && !asset.name.toLowerCase().endsWith('amd64');
+								return asset.name.toLowerCase().includes(this.os) && asset.name.toLowerCase().endsWith('amd64');
 							case 'arm64':
-								return asset.name.toLowerCase().includes(this.os) && !asset.name.toLowerCase().endsWith(this.arch);
+								return asset.name.toLowerCase().includes(this.os) && asset.name.toLowerCase().endsWith(this.arch);
 							default:
 								return false;
 						}
 					case 'windows':
 						switch (this.arch) {
 							case 'x64':
-								return asset.name.toLowerCase().includes(this.os) && !asset.name.toLowerCase().endsWith('amd64.zip');
+								return asset.name.toLowerCase().includes(this.os) && asset.name.toLowerCase().endsWith('amd64.zip');
 							default:
 								return false;
 						}
