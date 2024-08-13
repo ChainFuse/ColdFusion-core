@@ -192,6 +192,7 @@ export class PreCore extends BaseCore {
 			.finally(async () => {
 				info(`Verifying ollama is usable ${await this.ollamaInstalled}`);
 				endGroup();
+				startGroup('Model installation');
 				info(`Creating folder and parent(s): ${this.modelDir}`);
 				return mkdirP(this.modelDir).then(() => {
 					if (isGhCacheAvailable()) {
