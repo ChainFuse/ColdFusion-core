@@ -39,8 +39,6 @@ export class PreCore extends BaseCore {
 				per_page: 100,
 			})
 			.then((data) => {
-				console.debug('release count', data.length);
-
 				const targetVersion = evaluateVersions(
 					data.map((release) => clean(release.tag_name)!),
 					this.requestedOllamaVersion,
