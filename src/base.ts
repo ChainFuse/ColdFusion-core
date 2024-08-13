@@ -4,7 +4,6 @@ import { format, join, parse } from 'node:path';
 
 export class BaseCore {
 	protected os = getInput('os', { required: true, trimWhitespace: true }).toLowerCase() as 'linux' | 'windows' | 'macos';
-	protected arch = getInput('arch', { required: true, trimWhitespace: true }).toLowerCase() as 'x86' | 'x64' | 'arm' | 'arm64';
 
 	protected requestedOllamaVersion = getInput('ollama-version', { required: true, trimWhitespace: true });
 	protected model: string = getInput('model', { required: true, trimWhitespace: true });
