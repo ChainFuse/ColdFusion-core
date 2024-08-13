@@ -60,6 +60,11 @@ export class PreCore extends BaseCore {
 			});
 	}
 
+	private static modeToString(mode: number): string {
+		const permissions = [mode & constants.S_IRUSR ? 'r' : '-', mode & constants.S_IWUSR ? 'w' : '-', mode & constants.S_IXUSR ? 'x' : '-', mode & constants.S_IRGRP ? 'r' : '-', mode & constants.S_IWGRP ? 'w' : '-', mode & constants.S_IXGRP ? 'x' : '-', mode & constants.S_IROTH ? 'r' : '-', mode & constants.S_IWOTH ? 'w' : '-', mode & constants.S_IXOTH ? 'x' : '-'];
+		return permissions.join('');
+	}
+
 	private installOllama() {
 		return this.ollamaVersionHttp.then((release) => {
 			const executableAsset = release?.assets.find((asset) => {
@@ -130,8 +135,8 @@ export class PreCore extends BaseCore {
 								info('Adding execute bit to executable');
 								return stat(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'))
 									.then(({ mode }) => {
-										info(`${mode} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`);
-										return chmod(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'), mode | constants.S_IXUSR).then(() => info(`${mode | constants.S_IXUSR} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`));
+										info(`${PreCore.modeToString(mode)} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`);
+										return chmod(join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama'), mode | constants.S_IXUSR).then(() => info(`${PreCore.modeToString(mode | constants.S_IXUSR)} ${join(ollamaPath, this.os === 'windows' ? 'ollama.exe' : 'ollama')}`));
 									})
 									.then(() => {
 										info("Caching tool archive in github's tool cache");
@@ -145,8 +150,8 @@ export class PreCore extends BaseCore {
 								info('Adding execute bit to executable');
 								stat(ollamaPath)
 									.then(({ mode }) => {
-										info(`${mode} ${ollamaPath}`);
-										return chmod(ollamaPath, mode | constants.S_IXUSR).then(() => info(`${mode | constants.S_IXUSR} ${ollamaPath}`));
+										info(`${PreCore.modeToString(mode)} ${ollamaPath}`);
+										return chmod(ollamaPath, mode | constants.S_IXUSR).then(() => info(`${PreCore.modeToString(mode | constants.S_IXUSR)} ${ollamaPath}`));
 									})
 									.then(() => {
 										info("Caching tool in github's tool cache");
