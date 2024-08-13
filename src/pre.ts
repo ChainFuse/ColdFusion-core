@@ -2,7 +2,8 @@ import { isFeatureAvailable as isGhCacheAvailable } from '@actions/cache';
 import { addPath, endGroup, exportVariable, getBooleanInput, getInput, info, startGroup, warning } from '@actions/core';
 import { exec } from '@actions/exec';
 import { getOctokit } from '@actions/github';
-import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip, find } from '@actions/tool-cache';
+import { which } from '@actions/io';
+import { cacheDir, cacheFile, downloadTool, evaluateVersions, extract7z, extractTar, extractXar, extractZip } from '@actions/tool-cache';
 import { Buffer } from 'node:buffer';
 import { timingSafeEqual } from 'node:crypto';
 import { constants, mkdir } from 'node:fs/promises';
@@ -27,12 +28,18 @@ export class PreCore extends BaseCore {
 	}
 
 	private get ollamaInstalled() {
-		const path = join(find('ollama', this.requestedOllamaVersion), this.os === 'windows' ? 'ollama.exe' : 'ollama');
-		console.info('find', path);
-		return exec(path, undefined, { silent: true })
-			.then((exitCode) => {
-				console.debug('ollama exit code', exitCode);
-				return true;
+		return which('ollama', true)
+			.then((path) => {
+				console.info('find', path);
+
+				return exec(path, undefined, { silent: true })
+					.then((exitCode) => {
+						console.debug('ollama exit code', exitCode);
+						return true;
+					})
+					.catch((e) => {
+						throw e;
+					});
 			})
 			.catch((e) => {
 				throw e;
