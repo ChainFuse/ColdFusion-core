@@ -37,7 +37,7 @@ export class PreCore extends BaseCore {
 	}
 
 	private get ollamaVersion() {
-		if (this.requested) {
+		if (this.requestedOllamaVersion) {
 			return getOctokit(getInput('token', { required: true, trimWhitespace: true }))
 				.rest.repos.listReleases({
 					owner: 'ollama',
@@ -48,7 +48,7 @@ export class PreCore extends BaseCore {
 					return releases.find((release) => {
 						const temp = clean(release.tag_name);
 						if (temp) {
-							return satisfies(this.requested!, temp);
+							return satisfies(this.requestedOllamaVersion, temp);
 						} else {
 							return false;
 						}
